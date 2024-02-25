@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:intl/intl.dart';
+
 import '../database/models/category.dart';
 import '../database/models/note.dart';
 import '../database/providers/model_provider.dart';
@@ -23,7 +25,8 @@ class _EditCategoryFormState extends State<EditCategoryForm>
     with CustomForms {
   final _formKey = GlobalKey<FormState>();
 
-  final name = TextEditingController();
+  final _name = TextEditingController();
+  int _color = Colors.blue.value;
 
   Category? category;
   late ModelProvider<Category> categoryProvider;
@@ -38,7 +41,8 @@ class _EditCategoryFormState extends State<EditCategoryForm>
   }
 
   void loadFields() {
-    name.text = category != null ? category!.name : '';
+    _name.text = category != null ? category!.name : '';
+    _color = category != null ? category!.color : Colors.blue.value;
   }
 
   initState() {
@@ -52,6 +56,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: Text(
           _editMode() ? l10n.loc!.editCategory : l10n.loc!.addCategory,
           style: TextStyle(fontSize: 18),
@@ -64,7 +69,8 @@ class _EditCategoryFormState extends State<EditCategoryForm>
                 if (_formKey.currentState!.validate()) {
                   save(
                       context,
-                      name.text,
+                      _name.text,
+                      _color,
                       );
                 }
               }),
@@ -83,10 +89,17 @@ class _EditCategoryFormState extends State<EditCategoryForm>
                     BasicField(
                         l10n.loc!.categoryName,
                         'name',
-                        name,
+                        _name,
                         TextInputType.text,
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^.{0,50}$'))),
+                   SizedBox.square(dimension: 20),
+                    Text('Color',style: TextStyle(color: Colors.black)),
+                    ColorPicker(
+                        showColorValue: true,
+                        color: Color(_color),
+                        pickersEnabled: const <ColorPickerType,bool>{ColorPickerType.accent: false},
+                        onColorChanged: onColorChanged)
                   ],
                 ),
               ),
@@ -99,7 +112,8 @@ class _EditCategoryFormState extends State<EditCategoryForm>
 
   Future<void> save(
       BuildContext context,
-      String name
+      String name,
+      int color
       ) async {
     int? newId = 0;
     String message = '';
@@ -107,6 +121,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
     newId = await categoryProvider.insert(Category(
         id: _editMode() ? category!.id : null,
         name: name,
+        color: color
         ));
     if (newId != 0) {
       message = l10n.loc!.categorySaved(name);
@@ -121,6 +136,10 @@ class _EditCategoryFormState extends State<EditCategoryForm>
 
   bool _editMode() {
     return category != null;
+  }
+
+  void onColorChanged(Color colorRef){
+    _color = colorRef.value;
   }
 
 }

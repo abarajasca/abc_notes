@@ -47,7 +47,8 @@ class SqLiteDatabase implements DatabaseProvider {
   void _createScript(Database db){
     List<String> tables = [
       'CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY, title TEXT,body TEXT,date TEXT NOT NULL,id_category INTEGER);',
-      'CREATE TABLE IF NOT EXISTS categories(id INTEGER PRIMARY KEY,name TEXT);'
+      'CREATE TABLE IF NOT EXISTS categories(id INTEGER PRIMARY KEY,name TEXT,color INTEGER);',
+      "INSERT INTO categories(id,name,color) VALUES(1,'General',4280391411);"
     ];
     tables.forEach((table) async {
       await db.execute(table);

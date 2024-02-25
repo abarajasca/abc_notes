@@ -150,6 +150,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
   PreferredSizeWidget? getAppBar(){
     if (widget.mode == FormModes.select){
       return AppBar(
+          backgroundColor: Colors.green,
           title: Text( l10n.loc!.notes,style: TextStyle(fontSize: 18)),
           centerTitle: false
       );

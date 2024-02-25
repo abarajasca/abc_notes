@@ -55,6 +55,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: Text(
           _editMode() ? l10n.loc!.editNote : l10n.loc!.addNote,
           style: TextStyle(fontSize: 18),
@@ -170,7 +171,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   Future<List<Category>> fetchCategories() async {
     _categoriesData =
         (await categoryProvider.getAll(Category.getDummyReference()))
-            .map((category) => Category(id: category.id, name: category.name))
+            .map((category) => Category(id: category.id, name: category.name, color: category.color))
             .toList();
     _categoriesData.sort((a, b) {
       return a.name.compareTo(b.name);

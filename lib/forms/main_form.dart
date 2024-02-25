@@ -38,6 +38,7 @@ class _MainFormState extends State<MainForm> {
       title: appTitle,
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.green,
           title: Text(appTitle,style: TextStyle(fontSize: 18)),
           actions: _actions[_currentForm],
         ),
@@ -54,7 +55,8 @@ class _MainFormState extends State<MainForm> {
             ),
           ],
           currentIndex: _currentForm,
-          selectedItemColor: Colors.blue[800],
+          selectedItemColor: Colors.white,
+          backgroundColor: Colors.green,
           onTap: _onItemTapped,
         ),
       ),

@@ -12,17 +12,17 @@ class CategoriesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _CategoriesFormState _categoriesFormState;
 
-  CategoriesForm({Key? key,required this.mode}) : super(key: key);
+  CategoriesForm({Key? key, required this.mode}) : super(key: key);
 
   @override
   State<CategoriesForm> createState() {
-    _categoriesFormState =  _CategoriesFormState();
+    _categoriesFormState = _CategoriesFormState();
     return _categoriesFormState;
   }
 
   @override
   void onAction(AppActions action) {
-    switch ( action ){
+    switch (action) {
       case AppActions.add:
         {
           _categoriesFormState.addCategory();
@@ -44,10 +44,10 @@ class CategoriesForm extends StatefulWidget implements FormActions {
 
 class _CategoriesFormState extends State<CategoriesForm> with Settings {
   late List<Selectable> dataModel;
-  bool refreshData=true;
+  bool refreshData = true;
   late ModelProvider<Category> categoryProvider;
 
-  _CategoriesFormState(){
+  _CategoriesFormState() {
     categoryProvider = ModelProvider<Category>();
   }
 
@@ -58,7 +58,8 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
       body: FutureBuilder<List<Selectable>>(
           future: fetchData(),
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.connectionState == ConnectionState.done ) {
+            if (snapshot.hasData &&
+                snapshot.connectionState == ConnectionState.done) {
               return ListView.separated(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
@@ -66,15 +67,36 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                      title: Text('${dataModel[index].model.name}'),
-                      onTap: (){
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 90,
+                          child: Text('${dataModel[index].model.name}')
+                          ),
+                       Expanded(
+                         flex: 10,
+                         child:
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: new BoxDecoration(
+                          color: Color(dataModel[index].model.color),
+                          shape: BoxShape.circle,
+                        )
+                      )
+                       ),
+                        ],
+                      ),
+                      onTap: () {
                         if (widget.mode == FormModes.select) {
-                          Navigator.pop(context,dataModel[index]);
+                          Navigator.pop(context, dataModel[index]);
                         } else {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => EditCategoryForm(category: dataModel[index].model)))
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => EditCategoryForm(
+                                          category: dataModel[index].model)))
                               .then((value) {
                             setState(() {
                               refreshData = true;
@@ -86,10 +108,9 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                         value: dataModel[index].isSelected,
                         onChanged: (bool? value) {
                           dataModel[index].isSelected = value!;
-                          setState(() { });
+                          setState(() {});
                         },
-                      )
-                  );
+                      ));
                 },
                 separatorBuilder: (BuildContext context, int index) =>
                     const Divider(),
@@ -104,10 +125,10 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      dataModel =  (await categoryProvider.getAll(Category.getDummyReference() ))
+      dataModel = (await categoryProvider.getAll(Category.getDummyReference()))
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
-      dataModel.sort((a,b){
+      dataModel.sort((a, b) {
         return a.model.name.compareTo(b.model.name);
       });
       refreshData = false;
@@ -115,11 +136,9 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
     return dataModel;
   }
 
-  void addCategory(){
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditCategoryForm()))
+  void addCategory() {
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => EditCategoryForm()))
         .then((value) {
       setState(() {
         refreshData = true;
@@ -127,8 +146,8 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
     });
   }
 
-  void delete(){
-    if (deleteItems(dataModel)){
+  void delete() {
+    if (deleteItems(dataModel)) {
       refreshData = true;
       setState(() {});
     }
@@ -137,7 +156,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   bool deleteItems(List<Selectable> dataModel) {
     bool deleted = false;
 
-    dataModel.forEach((item)  {
+    dataModel.forEach((item) {
       if (item.isSelected) {
         deleted = true;
         categoryProvider.delete(item.model);
@@ -146,18 +165,18 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
     return deleted;
   }
 
-  PreferredSizeWidget? getAppBar(){
-    if (widget.mode == FormModes.select){
+  PreferredSizeWidget? getAppBar() {
+    if (widget.mode == FormModes.select) {
       return AppBar(
-          title: Text( l10n.loc!.categories,style: TextStyle(fontSize: 18)),
-          centerTitle: false
-      );
+          backgroundColor: Colors.green,
+          title: Text(l10n.loc!.categories, style: TextStyle(fontSize: 18)),
+          centerTitle: false);
     } else {
       return null;
     }
   }
 
-  void openSettings(){
-    showSettings(context,(value){});
+  void openSettings() {
+    showSettings(context, (value) {});
   }
 }

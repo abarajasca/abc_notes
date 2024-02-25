@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  auto_size_text:
-    dependency: transitive
-    description:
-      name: auto_size_text
-      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -185,22 +177,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  equatable:
-    dependency: transitive
-    description:
-      name: equatable
-      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.5"
-  expressions:
-    dependency: transitive
-    description:
-      name: expressions
-      sha256: "0a3a207dc4697bbb0e17c731c7f10f2df6f88d9dbb99ac83c4168a10b57e7a20"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.5+1"
   fake_async:
     dependency: transitive
     description:
@@ -233,40 +209,32 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  fl_chart:
+  flex_color_picker:
     dependency: "direct main"
     description:
-      name: fl_chart
-      sha256: c1e26c7e48496be85104c16c040950b0436674cdf0737f3f6e95511b2529b592
+      name: flex_color_picker
+      sha256: "0871edc170153cfc3de316d30625f40a85daecfa76ce541641f3cc0ec7757cbf"
       url: "https://pub.dev"
     source: hosted
-    version: "0.63.0"
+    version: "3.3.1"
+  flex_seed_scheme:
+    dependency: transitive
+    description:
+      name: flex_seed_scheme
+      sha256: "29c12aba221eb8a368a119685371381f8035011d18de5ba277ad11d7dfb8657f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_grid_button:
-    dependency: transitive
-    description:
-      name: flutter_grid_button
-      sha256: "51e8a3838439ccdc33363a8fec2cb7575d63a3a2cf37f189d110a05ae2740752"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_simple_calculator:
-    dependency: "direct main"
-    description:
-      name: flutter_simple_calculator
-      sha256: "55116e1efb5cfb376e3f33c236d6c194e732b8a708b20f949404f074a4b9255d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -437,14 +405,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
-  petitparser:
-    dependency: transitive
-    description:
-      name: petitparser
-      sha256: eeb2d1428ee7f4170e2bd498827296a18d4e7fc462b71727d111c0ac7707cfa6
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.1"
   platform:
     dependency: transitive
     description:
@@ -485,22 +445,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.1"
-  rxdart:
-    dependency: transitive
-    description:
-      name: rxdart
-      sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.27.7"
   shared_preferences:
     dependency: "direct main"
     description:
