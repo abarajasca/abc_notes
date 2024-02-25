@@ -80,7 +80,6 @@ class _EditCategoryFormState extends State<EditCategoryForm>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    editDescriptionForm(name),
                     BasicField(
                         l10n.loc!.categoryName,
                         'name',

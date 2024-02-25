@@ -1,5 +1,6 @@
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
+import 'package:abc_notes/forms/edit_note_form.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
@@ -71,15 +72,15 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         if (widget.mode == FormModes.select) {
                           Navigator.pop(context,dataModel[index]);
                         } else {
-                          /*Navigator.push(
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => EditInvestmentForm(investment: dataModel[index].model)))
+                                  builder: (context) => EditNoteForm(note: dataModel[index].model)))
                               .then((value) {
                             setState(() {
                               refreshData = true;
                             });
-                          });*/
+                          });
                         }
                       },
                       trailing: Checkbox(
@@ -116,15 +117,15 @@ class _NotesFormState extends State<NotesForm> with Settings {
   }
 
   void addNote(){
-    /*Navigator.push(
+    Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditInvestmentForm()))
+            builder: (context) => EditNoteForm()))
         .then((value) {
       setState(() {
         refreshData = true;
       });
-    });*/
+    });
   }
 
   void delete(){
@@ -136,15 +137,13 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   bool deleteItems(List<Selectable> dataModel) {
     bool deleted = false;
-/*    final ModelProvider<InvestmentDetail> investmentDetailProvider = ModelProvider<InvestmentDetail>();
 
     dataModel.forEach((item)  {
       if (item.isSelected) {
         deleted = true;
-        investmentDetailProvider.deleteRaw(tableName: InvestmentDetail.TABLE_NAME,where: 'id_investment = ?', whereArgs: [item.model.id]);
-        investmentProvider.delete(item.model);
+        noteProvider.delete(item.model);
       }
-    });*/
+    });
     return deleted;
   }
 

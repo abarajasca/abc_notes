@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../database/models/category.dart';
 import '../database/models/note.dart';
 import '../database/providers/model_provider.dart';
 import '../mixins/custom_forms.dart';
@@ -14,34 +15,33 @@ class EditNoteForm extends StatefulWidget {
   EditNoteForm({Key? key, this.note}) : super(key: key);
 
   @override
-  State<EditNoteForm> createState() =>
-      _EditNoteFormState(note: note);
+  State<EditNoteForm> createState() => _EditNoteFormState(note: note);
 }
 
-class _EditNoteFormState extends State<EditNoteForm>
-    with CustomForms {
+class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   final _formKey = GlobalKey<FormState>();
+  late ModelProvider<Category> categoryProvider;
+  late List<Category> _categoriesData;
 
   final title = TextEditingController();
   final body = TextEditingController();
   final date = TextEditingController();
+  int idCategory = 0;
 
   Note? note;
   late ModelProvider<Note> noteProvider;
 
-  late List<Selectable> dataModel = [];
-  bool refreshData = true;
-  int dataLength = 0;
-
   _EditNoteFormState({this.note}) {
     loadFields();
     noteProvider = ModelProvider<Note>();
+    categoryProvider = ModelProvider<Category>();
   }
 
   void loadFields() {
     title.text = note != null ? note!.title : '';
     body.text = note != null ? note!.body : '';
     date.text = note != null ? note!.date : '2000-01-01';
+    idCategory = note != null ? note!.idCategory : 1;
   }
 
   initState() {
@@ -65,11 +65,7 @@ class _EditNoteFormState extends State<EditNoteForm>
               icon: const Icon(Icons.save, color: Colors.white),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  save(
-                      context,
-                      title.text,
-                      body.text,
-                      date.text);
+                  save(context, title.text, body.text, date.text, idCategory);
                 }
               }),
         ],
@@ -84,7 +80,6 @@ class _EditNoteFormState extends State<EditNoteForm>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    editDescriptionForm(title),
                     BasicField(
                         l10n.loc!.title,
                         'title',
@@ -92,17 +87,46 @@ class _EditNoteFormState extends State<EditNoteForm>
                         TextInputType.text,
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^.{0,50}$'))),
+                    FutureBuilder<List<Category>>(
+                        future: fetchCategories(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData &&
+                              snapshot.connectionState ==
+                                  ConnectionState.done) {
+                            return DropdownButtonFormField(
+                                decoration: InputDecoration(
+                                    labelText: l10n.loc!.category,
+                                    labelStyle: TextStyle(color: Colors.black),
+                                    fillColor: Colors.lightBlue),
+                                items: _categoriesData
+                                    .map((Category category) =>
+                                        DropdownMenuItem(
+                                            child: Text(category.name),
+                                            value: category.id))
+                                    .toList(),
+                                value: idCategory,
+                                onChanged: (dynamic value) {
+                                  setState(() {
+                                    idCategory = value;
+                                  });
+                                });
+                          } else if (snapshot.hasError) {
+                            return Text(snapshot.error.toString());
+                          }
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }),
                     Row(
                       children: [
                         Expanded(
-                            flex: 50,
-                            child: BasicField(
-                                l10n.loc!.body,
-                                'body',
-                                body,
-                                TextInputType.text,
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^.{0,50}$'))),
+                          flex: 50,
+                          child: BasicField(
+                              l10n.loc!.body,
+                              'body',
+                              body,
+                              TextInputType.text,
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^.{0,50}$'))),
                         ),
                       ],
                     ),
@@ -117,11 +141,12 @@ class _EditNoteFormState extends State<EditNoteForm>
   }
 
   Future<void> save(
-      BuildContext context,
-      String title,
-      String body,
-      String date,
-      ) async {
+    BuildContext context,
+    String title,
+    String body,
+    String date,
+    int idCategory,
+  ) async {
     int? newId = 0;
     String message = '';
 
@@ -130,7 +155,7 @@ class _EditNoteFormState extends State<EditNoteForm>
         title: title,
         body: body,
         date: date,
-        idCategory: 1));
+        idCategory: idCategory));
     if (newId != 0) {
       message = l10n.loc!.noteSaved(title);
       Navigator.pop(context);
@@ -142,8 +167,19 @@ class _EditNoteFormState extends State<EditNoteForm>
     );
   }
 
+  Future<List<Category>> fetchCategories() async {
+    _categoriesData =
+        (await categoryProvider.getAll(Category.getDummyReference()))
+            .map((category) => Category(id: category.id, name: category.name))
+            .toList();
+    _categoriesData.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+
+    return _categoriesData;
+  }
+
   bool _editMode() {
     return note != null;
   }
-
 }

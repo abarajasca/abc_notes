@@ -45,11 +45,11 @@ class _MainFormState extends State<MainForm> {
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.insights),
+              icon: Icon(Icons.notes),
               label: AppLocalizations.of(context)!.notes,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.wallet),
+              icon: Icon(Icons.category),
               label: AppLocalizations.of(context)!.categories,
             ),
           ],
@@ -70,40 +70,18 @@ class _MainFormState extends State<MainForm> {
 
   // Update Icons from the forms
   List <List<Widget>> _buildActions(){
-    final List <List<Widget>> actionList = [
-        [IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () {
-              _callOnAction(1,AppActions.add);
-            }),
-          IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: () {
-                _callOnAction(1,AppActions.delete);
-              })
-        ],
-        [IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () {
-              _callOnAction(2,AppActions.add);
-            }),
-          IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: () {
-                _callOnAction(2,AppActions.delete);
-              })
-        ]
-      ];
+    final List <List<Widget>> actionList = [[],[]];
+
     for (var index in [0,1]){
       actionList[index].add(IconButton(
-          icon: const Icon(Icons.settings, color: Colors.white),
+          icon: const Icon(Icons.add, color: Colors.white),
           onPressed: () {
-            _callOnAction(index,AppActions.settings);
+            _callOnAction(index,AppActions.add);
           }));
       actionList[index].add(IconButton(
-          icon: const Icon(Icons.settings, color: Colors.white),
+          icon: const Icon(Icons.delete, color: Colors.white),
           onPressed: () {
-            _callOnAction(index,AppActions.settings);
+            _callOnAction(index,AppActions.delete);
           }));
       actionList[index].add(IconButton(
           icon: const Icon(Icons.settings, color: Colors.white),
@@ -118,3 +96,6 @@ class _MainFormState extends State<MainForm> {
     (_forms[index] as FormActions).onAction(action);
   }
 }
+
+
+// TODO: validate used categories before delete

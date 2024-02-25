@@ -1,4 +1,5 @@
 import 'package:abc_notes/database/models/category.dart';
+import 'package:abc_notes/forms/edit_category_form.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
@@ -70,15 +71,15 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                         if (widget.mode == FormModes.select) {
                           Navigator.pop(context,dataModel[index]);
                         } else {
-                          /*Navigator.push(
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => EditInvestmentForm(investment: dataModel[index].model)))
+                                  builder: (context) => EditCategoryForm(category: dataModel[index].model)))
                               .then((value) {
                             setState(() {
                               refreshData = true;
                             });
-                          });*/
+                          });
                         }
                       },
                       trailing: Checkbox(
@@ -115,15 +116,15 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   }
 
   void addCategory(){
-    /*Navigator.push(
+    Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditInvestmentForm()))
+            builder: (context) => EditCategoryForm()))
         .then((value) {
       setState(() {
         refreshData = true;
       });
-    });*/
+    });
   }
 
   void delete(){
@@ -135,15 +136,13 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   bool deleteItems(List<Selectable> dataModel) {
     bool deleted = false;
-/*    final ModelProvider<InvestmentDetail> investmentDetailProvider = ModelProvider<InvestmentDetail>();
 
     dataModel.forEach((item)  {
       if (item.isSelected) {
         deleted = true;
-        investmentDetailProvider.deleteRaw(tableName: InvestmentDetail.TABLE_NAME,where: 'id_investment = ?', whereArgs: [item.model.id]);
-        investmentProvider.delete(item.model);
+        categoryProvider.delete(item.model);
       }
-    });*/
+    });
     return deleted;
   }
 
