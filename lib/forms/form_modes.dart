@@ -1,0 +1,6 @@
+enum FormModes {
+  select,
+  edit
+}
+
+

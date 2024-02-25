@@ -1,0 +1,45 @@
+{
+  "currentLanguage": "en",
+  "appTitle" : "Abc Notes",
+  "note": "Note",
+  "category": "Category",
+
+  "notes": "Notes",
+  "categories": "Categories",
+
+  "title": "Title",
+  "body": "Body",
+  "date": "Created date",
+
+  "editNote": "Edit Note",
+  "addNote": "New Note",
+  "noteSaved": "Note {title} saved.",
+  "@noteSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "GMB"
+      }
+    }
+  },
+  "errorNoteNotSave": "Error. Note not saved",
+
+  "categoryName": "Name",
+  "editCategory": "Edit Category",
+  "addCategory":  "Add Category",
+  "categorySaved": "Category {name} saved.",
+  "@categorySaved": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "GMB"
+      }
+    }
+  },
+  "errorCategoryNotSave": "Error. Category not saved",
+
+  "configurations": "Configurations",
+
+  "valueRequired": "Value is required."
+
+}

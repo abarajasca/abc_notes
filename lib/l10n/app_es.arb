@@ -1,0 +1,46 @@
+{
+  "currentLanguage": "en",
+  "appTitle" : "Abc Notas",
+  "note": "Nota",
+  "category": "Categoria",
+
+  "notes": "Notas",
+  "categories": "Categorias",
+
+  "title": "Titulo",
+  "body": "Texto",
+  "date": "Creada",
+
+  "editNote": "Editar nota",
+  "addNote": "Nueva nota",
+  "noteSaved": "Nota {title} guardada.",
+  "@noteSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "GMB"
+      }
+    }
+  },
+  "errorNoteNotSave": "Error. Nota no guardada",
+
+  "categoryName": "Nombre",
+
+  "editCategory": "Editar Categoria",
+  "addCategory":  "Agregar categoria",
+  "categorySaved": "Categoria {name} guardada.",
+  "@categorySaved": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "GMB"
+      }
+    }
+  },
+  "errorCategoryNotSave": "Error. Categoria not guardada",
+
+  "configurations": "Configurationes",
+
+  "valueRequired": "Un valor es requerido."
+
+}
