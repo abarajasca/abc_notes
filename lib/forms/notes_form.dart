@@ -1,9 +1,11 @@
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
+import 'package:flutter/widgets.dart';
 import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
@@ -13,17 +15,17 @@ class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _NotesFormState _notesFormState;
 
-  NotesForm({Key? key,required this.mode}) : super(key: key);
+  NotesForm({Key? key, required this.mode}) : super(key: key);
 
   @override
   State<NotesForm> createState() {
-    _notesFormState =  _NotesFormState();
+    _notesFormState = _NotesFormState();
     return _notesFormState;
   }
 
   @override
   void onAction(AppActions action) {
-    switch ( action ){
+    switch (action) {
       case AppActions.add:
         {
           _notesFormState.addNote();
@@ -45,10 +47,10 @@ class NotesForm extends StatefulWidget implements FormActions {
 
 class _NotesFormState extends State<NotesForm> with Settings {
   late List<Selectable> dataModel;
-  bool refreshData=true;
+  bool refreshData = true;
   late ModelProvider<Note> noteProvider;
 
-  _NotesFormState(){
+  _NotesFormState() {
     noteProvider = ModelProvider<Note>();
   }
 
@@ -59,23 +61,51 @@ class _NotesFormState extends State<NotesForm> with Settings {
       body: FutureBuilder<List<Selectable>>(
           future: fetchData(),
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.connectionState == ConnectionState.done ) {
+            if (snapshot.hasData &&
+                snapshot.connectionState == ConnectionState.done) {
               return ListView.separated(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(8),
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
+                  Category? category = dataModel[index].model.category;
+                  String categoryName = category != null ? category.name : '';
+                  int categoryColor = category != null ? category.color : Colors.blue.value;
                   return ListTile(
-                      title: Text('${dataModel[index].model.title}'),
-                      onTap: (){
+                      title: Row(
+                        children: [
+                          Expanded(
+                              flex: 75,
+                              child: Text('${dataModel[index].model.title}')),
+                          Expanded(
+                            flex: 25,
+                            child: Text(
+                              categoryName,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  background: Paint()
+                                    ..color = Color(
+                                        categoryColor)
+                                    ..strokeWidth = 15
+                                    ..strokeJoin = StrokeJoin.round
+                                    ..strokeCap = StrokeCap.round
+                                    ..style = PaintingStyle.stroke,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
                         if (widget.mode == FormModes.select) {
-                          Navigator.pop(context,dataModel[index]);
+                          Navigator.pop(context, dataModel[index]);
                         } else {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => EditNoteForm(note: dataModel[index].model)))
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => EditNoteForm(
+                                          note: dataModel[index].model)))
                               .then((value) {
                             setState(() {
                               refreshData = true;
@@ -87,10 +117,9 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         value: dataModel[index].isSelected,
                         onChanged: (bool? value) {
                           dataModel[index].isSelected = value!;
-                          setState(() { });
+                          setState(() {});
                         },
-                      )
-                  );
+                      ));
                 },
                 separatorBuilder: (BuildContext context, int index) =>
                     const Divider(),
@@ -100,27 +129,40 @@ class _NotesFormState extends State<NotesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
+      floatingActionButton:
+           FloatingActionButton(
+              onPressed: () {
+                addNote();
+              },
+              backgroundColor: Colors.green,
+              child: Icon(Icons.add),
+            ),
     );
   }
 
+  //(note) {
+  //Selectable(model: note, isSelected: false);
+  //}
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      dataModel =  (await noteProvider.getAll(Note.getDummyReference() ))
-          .map((note) => Selectable(model: note, isSelected: false))
-          .toList();
-      dataModel.sort((a,b){
+      dataModel = (await noteProvider.getAll(Note.getDummyReference()))
+          .map<Selectable<Note>>((Note note) {
+        return Selectable(model: note, isSelected: false);
+      }).toList();
+      dataModel.sort((a, b) {
         return a.model.title.compareTo(b.model.title);
+      });
+      dataModel.forEach((item) async {
+        (await item.model.getCategory());
       });
       refreshData = false;
     }
     return dataModel;
   }
 
-  void addNote(){
+  void addNote() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditNoteForm()))
+            context, MaterialPageRoute(builder: (context) => EditNoteForm()))
         .then((value) {
       setState(() {
         refreshData = true;
@@ -128,8 +170,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
     });
   }
 
-  void delete(){
-    if (deleteItems(dataModel)){
+  void delete() {
+    if (deleteItems(dataModel)) {
       refreshData = true;
       setState(() {});
     }
@@ -138,7 +180,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
   bool deleteItems(List<Selectable> dataModel) {
     bool deleted = false;
 
-    dataModel.forEach((item)  {
+    dataModel.forEach((item) {
       if (item.isSelected) {
         deleted = true;
         noteProvider.delete(item.model);
@@ -147,19 +189,18 @@ class _NotesFormState extends State<NotesForm> with Settings {
     return deleted;
   }
 
-  PreferredSizeWidget? getAppBar(){
-    if (widget.mode == FormModes.select){
+  PreferredSizeWidget? getAppBar() {
+    if (widget.mode == FormModes.select) {
       return AppBar(
           backgroundColor: Colors.green,
-          title: Text( l10n.loc!.notes,style: TextStyle(fontSize: 18)),
-          centerTitle: false
-      );
+          title: Text(l10n.loc!.notes, style: TextStyle(fontSize: 18)),
+          centerTitle: false);
     } else {
       return null;
     }
   }
 
-  void openSettings(){
-    showSettings(context,(value){});
+  void openSettings() {
+    showSettings(context, (value) {});
   }
 }

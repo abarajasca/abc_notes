@@ -120,6 +120,14 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
+      floatingActionButton:
+      FloatingActionButton(
+        onPressed: () {
+           addCategory();
+          },
+        backgroundColor: Colors.green,
+        child: Icon(Icons.add),
+      ),
     );
   }
 

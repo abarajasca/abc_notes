@@ -76,11 +76,6 @@ class _MainFormState extends State<MainForm> {
 
     for (var index in [0,1]){
       actionList[index].add(IconButton(
-          icon: const Icon(Icons.add, color: Colors.white),
-          onPressed: () {
-            _callOnAction(index,AppActions.add);
-          }));
-      actionList[index].add(IconButton(
           icon: const Icon(Icons.delete, color: Colors.white),
           onPressed: () {
             _callOnAction(index,AppActions.delete);

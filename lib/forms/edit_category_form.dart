@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:intl/intl.dart';
-
 import '../database/models/category.dart';
-import '../database/models/note.dart';
 import '../database/providers/model_provider.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
@@ -62,19 +59,6 @@ class _EditCategoryFormState extends State<EditCategoryForm>
           style: TextStyle(fontSize: 18),
         ),
         centerTitle: false,
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(Icons.save, color: Colors.white),
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  save(
-                      context,
-                      _name.text,
-                      _color,
-                      );
-                }
-              }),
-        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(15),
@@ -107,7 +91,25 @@ class _EditCategoryFormState extends State<EditCategoryForm>
           ),
         ),
       ),
+      floatingActionButton:
+      FloatingActionButton(
+        onPressed: () {
+          saveCategory();
+        },
+        backgroundColor: Colors.green,
+        child: Icon(Icons.save),
+      ),
     );
+  }
+
+  void saveCategory(){
+    if (_formKey.currentState!.validate()) {
+      save(
+        context,
+        _name.text,
+        _color,
+      );
+    }
   }
 
   Future<void> save(

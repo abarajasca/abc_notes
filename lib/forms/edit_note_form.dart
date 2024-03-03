@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import '../database/models/category.dart';
 import '../database/models/note.dart';
 import '../database/providers/model_provider.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
-import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 
 class EditNoteForm extends StatefulWidget {
@@ -61,15 +59,6 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
           style: TextStyle(fontSize: 18),
         ),
         centerTitle: false,
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(Icons.save, color: Colors.white),
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  save(context, title.text, body.text, date.text, idCategory);
-                }
-              }),
-        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(15),
@@ -94,23 +83,49 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                           if (snapshot.hasData &&
                               snapshot.connectionState ==
                                   ConnectionState.done) {
-                            return DropdownButtonFormField(
-                                decoration: InputDecoration(
-                                    labelText: l10n.loc!.category,
-                                    labelStyle: TextStyle(color: Colors.black),
-                                    fillColor: Colors.lightBlue),
-                                items: _categoriesData
-                                    .map((Category category) =>
-                                        DropdownMenuItem(
-                                            child: Text(category.name),
-                                            value: category.id))
-                                    .toList(),
-                                value: idCategory,
-                                onChanged: (dynamic value) {
-                                  setState(() {
-                                    idCategory = value;
-                                  });
-                                });
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                    flex: 50, child: Text(l10n.loc!.category)),
+                                Expanded(
+                                    flex: 50,
+                                    child: DropdownButtonFormField(
+                                        items: _categoriesData
+                                            .map((Category category) =>
+                                                DropdownMenuItem(
+                                                    alignment:
+                                                        AlignmentDirectional
+                                                            .center,
+                                                    child: Text(
+                                                      category.name,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          fontSize: 10,
+                                                          background: Paint()
+                                                            ..color = Color(
+                                                                category.color)
+                                                            ..strokeWidth = 15
+                                                            ..strokeJoin =
+                                                                StrokeJoin.round
+                                                            ..strokeCap =
+                                                                StrokeCap.round
+                                                            ..style =
+                                                                PaintingStyle
+                                                                    .stroke,
+                                                          color: Colors.white),
+                                                    ),
+                                                    value: category.id))
+                                            .toList(),
+                                        value: idCategory,
+                                        onChanged: (dynamic value) {
+                                          setState(() {
+                                            idCategory = value;
+                                          });
+                                        }))
+                              ],
+                            );
                           } else if (snapshot.hasError) {
                             return Text(snapshot.error.toString());
                           }
@@ -121,13 +136,17 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                       children: [
                         Expanded(
                           flex: 50,
-                          child: BasicField(
-                              l10n.loc!.body,
-                              'body',
-                              body,
-                              TextInputType.text,
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^.{0,50}$'))),
+                          child: TextField(
+                            controller: body,
+                            maxLines: null,
+                            keyboardType: TextInputType.multiline,
+                            decoration: InputDecoration(
+                              hintText: l10n.loc!.body,
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(width: 1, color: Colors.grey)),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -138,7 +157,20 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          saveNote();
+        },
+        backgroundColor: Colors.green,
+        child: Icon(Icons.save),
+      ),
     );
+  }
+
+  void saveNote() {
+    if (_formKey.currentState!.validate()) {
+      save(context, title.text, body.text, date.text, idCategory);
+    }
   }
 
   Future<void> save(
@@ -171,7 +203,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   Future<List<Category>> fetchCategories() async {
     _categoriesData =
         (await categoryProvider.getAll(Category.getDummyReference()))
-            .map((category) => Category(id: category.id, name: category.name, color: category.color))
+            .map((category) => Category(
+                id: category.id, name: category.name, color: category.color))
             .toList();
     _categoriesData.sort((a, b) {
       return a.name.compareTo(b.name);
