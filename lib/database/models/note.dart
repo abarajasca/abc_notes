@@ -9,7 +9,7 @@ class Note extends ModelBase {
   late String title;
   late String body;
   late String date;
-  Category? category;
+  late Category _category;
 
   static const TABLE_NAME = 'notes';
 
@@ -64,19 +64,12 @@ class Note extends ModelBase {
     return TABLE_NAME;
   }
 
-  // Add category relation
-  Future<Category?> getCategory() async {
-    late List<Category> categories;
-    ModelProvider<Category> categoryProvider = ModelProvider<Category>();
-    if (category == null || category!.id != idCategory) {
-      categories = (await categoryProvider.getAll(Category.getDummyReference(),
-          where: 'id=$idCategory'));
-    }
-
-    if (categories.length > 0) {
-      category = categories[0];
-      return category;
-    } else
-      return null;
+  Category get category {
+    return _category;
   }
+
+  void set category(Category category){
+    _category = category;
+  }
+
 }

@@ -67,50 +67,47 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
                             flex: 90,
-                          child: Text('${dataModel[index].model.name}')
-                          ),
-                       Expanded(
-                         flex: 10,
-                         child:
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: new BoxDecoration(
-                          color: Color(dataModel[index].model.color),
-                          shape: BoxShape.circle,
-                        )
-                      )
-                       ),
-                        ],
-                      ),
-                      onTap: () {
-                        if (widget.mode == FormModes.select) {
-                          Navigator.pop(context, dataModel[index]);
-                        } else {
-                          Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EditCategoryForm(
-                                          category: dataModel[index].model)))
-                              .then((value) {
-                            setState(() {
-                              refreshData = true;
-                            });
+                            child: Text('${dataModel[index].model.name}')),
+                        Expanded(
+                            flex: 10,
+                            child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: new BoxDecoration(
+                                  color: Color(dataModel[index].model.color),
+                                  shape: BoxShape.circle,
+                                ))),
+                      ],
+                    ),
+                    onTap: () {
+                      if (widget.mode == FormModes.select) {
+                        Navigator.pop(context, dataModel[index]);
+                      } else {
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditCategoryForm(
+                                        category: dataModel[index].model)))
+                            .then((value) {
+                          setState(() {
+                            refreshData = true;
                           });
-                        }
-                      },
-                      trailing: Checkbox(
-                        value: dataModel[index].isSelected,
-                        onChanged: (bool? value) {
-                          dataModel[index].isSelected = value!;
-                          setState(() {});
-                        },
-                      ));
+                        });
+                      }
+                    },
+                    trailing:  Checkbox(
+                          value: dataModel[index].isSelected,
+                          onChanged: (bool? value) {
+                            dataModel[index].isSelected = value!;
+                            setState(() {});
+                          },
+                        ),
+                  );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
                     const Divider(),
@@ -120,11 +117,10 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
-      floatingActionButton:
-      FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
-           addCategory();
-          },
+          addCategory();
+        },
         backgroundColor: Colors.green,
         child: Icon(Icons.add),
       ),
