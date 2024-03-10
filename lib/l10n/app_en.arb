@@ -50,5 +50,16 @@
         "example": "General"
       }
     }
-  }
+  },
+  "selectFolder": "Select Folder to save exported notes.",
+  "notesExporterIn": "Notes exported in {selectedDirectory}",
+  "@notesExporterIn": {
+    "placeholders": {
+      "selectedDirectory": {
+        "type": "String",
+        "example": "/storage/sdcard"
+      }
+    }
+  },
+  "selectNotesToExport": "Select notes to export."
 }

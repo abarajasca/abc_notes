@@ -37,6 +37,8 @@ class _MainFormState extends State<MainForm> {
     l10n.loc = AppLocalizations.of(context);
     var appTitle = l10n.loc!.appTitle;
 
+
+
     return MaterialApp(
       title: appTitle,
       home: Scaffold(

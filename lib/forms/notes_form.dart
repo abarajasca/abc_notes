@@ -13,7 +13,7 @@ import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
@@ -213,24 +213,25 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   Future<void> exportNotes() async {
     if (dataModel.any((element) => element.isSelected)){
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: 'Select Folder to save exported notes.');
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
       if (selectedDirectory != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(selectedDirectory)),
-        );
 
         if (await Permission.manageExternalStorage.request().isGranted) {
           dataModel.where((element) => element.isSelected).forEach((
               element) async {
             String nameFilePath = '$selectedDirectory/${element.model
                 .title}.txt';
-            await File(nameFilePath).writeAsString(element.model.body);
+            String bodyContent = 'category:${element.model.category.name}\n\n${element.model.body}';
+            await File(nameFilePath).writeAsString(bodyContent);
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.loc!.notesExporterIn(selectedDirectory)))
+          );
         }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Select first notes to export.'))
+        SnackBar(content: Text(l10n.loc!.selectNotesToExport))
       );
     }
   }
