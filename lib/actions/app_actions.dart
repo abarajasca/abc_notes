@@ -2,7 +2,9 @@ enum AppActions {
     save,
     add,
     delete,
-    settings
+    settings,
+    export,
+    import
 }
 
 abstract class FormActions {

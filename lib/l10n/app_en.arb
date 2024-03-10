@@ -40,6 +40,15 @@
 
   "configurations": "Configurations",
 
-  "valueRequired": "Value is required."
+  "valueRequired": "Value is required.",
 
+  "categoryUsedInNotes": "{name} category still used by notes.",
+  "@categoryUsedInNotes": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "General"
+      }
+    }
+  }
 }

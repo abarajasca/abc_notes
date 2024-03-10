@@ -3,6 +3,7 @@ import 'package:abc_notes/forms/edit_category_form.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
+import '../database/models/note.dart';
 import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
@@ -44,11 +45,14 @@ class CategoriesForm extends StatefulWidget implements FormActions {
 
 class _CategoriesFormState extends State<CategoriesForm> with Settings {
   late List<Selectable> dataModel;
+  late List<int> categoriesUsed;
   bool refreshData = true;
   late ModelProvider<Category> categoryProvider;
+  late ModelProvider<Note> noteProvider;
 
   _CategoriesFormState() {
     categoryProvider = ModelProvider<Category>();
+    noteProvider = ModelProvider<Note>();
   }
 
   @override
@@ -129,6 +133,11 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
+      categoriesUsed = (await categoryProvider.rawQuery('select distinct( id_category ) as idCategory from notes'))
+            .map((item){
+                return item['idCategory'] as int;
+              })
+            .toList();
       dataModel = (await categoryProvider.getAll(Category.getDummyReference()))
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
@@ -161,9 +170,15 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
     bool deleted = false;
 
     dataModel.forEach((item) {
-      if (item.isSelected) {
-        deleted = true;
-        categoryProvider.delete(item.model);
+      if (item.isSelected  ) {
+        if ( !categoriesUsed.contains(item.model.id) ) {
+          deleted = true;
+          categoryProvider.delete(item.model);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.loc!.categoryUsedInNotes(item.model.name)),
+          ));
+        }
       }
     });
     return deleted;

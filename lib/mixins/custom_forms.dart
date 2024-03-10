@@ -49,7 +49,7 @@ mixin CustomForms {
             }
             if (keyboadType != TextInputType.text) {
               if (validateZero && double.parse(value) == 0 ){
-                return 'TODO HERE';
+                return '';
               }
             }
             return null;

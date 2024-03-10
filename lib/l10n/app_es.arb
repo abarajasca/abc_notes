@@ -41,6 +41,16 @@
 
   "configurations": "Configurationes",
 
-  "valueRequired": "Un valor es requerido."
+  "valueRequired": "Un valor es requerido.",
+
+  "categoryUsedInNotes": "La categoria {name} es usada en algunas notas.",
+  "@categoryUsedInNotes": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "General"
+      }
+    }
+  }
 
 }

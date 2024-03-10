@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
@@ -10,6 +13,7 @@ import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
@@ -35,6 +39,9 @@ class NotesForm extends StatefulWidget implements FormActions {
         {
           _notesFormState.delete();
         }
+        break;
+      case AppActions.export:
+        _notesFormState.exportNotes();
         break;
       case AppActions.settings:
         {
@@ -202,5 +209,29 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   void openSettings() {
     showSettings(context, (value) {});
+  }
+
+  Future<void> exportNotes() async {
+    if (dataModel.any((element) => element.isSelected)){
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: 'Select Folder to save exported notes.');
+      if (selectedDirectory != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(selectedDirectory)),
+        );
+
+        if (await Permission.manageExternalStorage.request().isGranted) {
+          dataModel.where((element) => element.isSelected).forEach((
+              element) async {
+            String nameFilePath = '$selectedDirectory/${element.model
+                .title}.txt';
+            await File(nameFilePath).writeAsString(element.model.body);
+          });
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Select first notes to export.'))
+      );
+    }
   }
 }
