@@ -1,5 +1,4 @@
 import 'package:abc_notes/database/models/model_base.dart';
-import 'package:abc_notes/database/providers/model_provider.dart';
 
 import 'category.dart';
 

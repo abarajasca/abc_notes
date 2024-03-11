@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
@@ -42,6 +43,9 @@ class NotesForm extends StatefulWidget implements FormActions {
         break;
       case AppActions.export:
         _notesFormState.exportNotes();
+        break;
+      case AppActions.import:
+        _notesFormState.importNotes();
         break;
       case AppActions.settings:
         {
@@ -215,7 +219,6 @@ class _NotesFormState extends State<NotesForm> with Settings {
     if (dataModel.any((element) => element.isSelected)){
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
       if (selectedDirectory != null) {
-
         if (await Permission.manageExternalStorage.request().isGranted) {
           dataModel.where((element) => element.isSelected).forEach((
               element) async {
@@ -233,6 +236,37 @@ class _NotesFormState extends State<NotesForm> with Settings {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.loc!.selectNotesToExport))
       );
+    }
+  }
+
+  Future<void> importNotes() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true,type: FileType.custom, allowedExtensions: ['txt']);
+
+    if (result != null)  {
+      int idCategory = 1;
+      List<File> files = result.paths.map((path) => File(path!)).toList();
+      files.forEach((file) async {
+        var nameFile = file.path.split('/').last;
+        var body = await file.readAsStringSync();
+        var bodyClean = body.split('\n').first;
+        if (bodyClean.contains('category:')){
+          var categoryName = bodyClean.split(':').last;
+          var categoryList = await categoryProvider.getAll(Category.getDummyReference(),where: "name='${categoryName}'");
+          if (categoryList.isEmpty){  // Create category
+            var randColor = Random().nextInt(Colors.primaries.length);
+            idCategory = (await categoryProvider.insert(Category(name: categoryName,color: Colors.primaries[randColor].value )))!;
+          } else {
+            idCategory = categoryList.first.id!;
+          }
+          body = body.replaceFirst(bodyClean + '\n\n', '');
+        }
+        await noteProvider.insert(Note(title: nameFile.split('.').first,body: body,idCategory: idCategory,date: "01/01/01"));
+      });
+      setState(() {
+        refreshData = true;
+      });
+    } else {
+      // User canceled the picker
     }
   }
 }

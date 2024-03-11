@@ -114,10 +114,10 @@ class _MainFormState extends State<MainForm> {
   void _callOnAdditionalMenu(int index) {
     switch (index) {
       case 0:
-        (_forms[index] as FormActions).onAction(AppActions.export);
+        (_forms[0] as FormActions).onAction(AppActions.export);
         break;
       case 1:
-        (_forms[index] as FormActions).onAction(AppActions.import);
+        (_forms[0] as FormActions).onAction(AppActions.import);
         break;
     }
   }
