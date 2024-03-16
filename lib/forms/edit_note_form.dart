@@ -106,7 +106,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                                                           background: Paint()
                                                             ..color = Color(
                                                                 category.color)
-                                                            ..strokeWidth = 15
+                                                            ..strokeWidth = 18
                                                             ..strokeJoin =
                                                                 StrokeJoin.round
                                                             ..strokeCap =

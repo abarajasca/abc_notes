@@ -8,16 +8,19 @@ import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
+import 'main_form.dart';
 
 class CategoriesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _CategoriesFormState _categoriesFormState;
+  late MainFormState _mainForm;
 
   CategoriesForm({Key? key, required this.mode}) : super(key: key);
 
   @override
   State<CategoriesForm> createState() {
     _categoriesFormState = _CategoriesFormState();
+    _categoriesFormState.registerParent(_mainForm);
     return _categoriesFormState;
   }
 
@@ -39,7 +42,17 @@ class CategoriesForm extends StatefulWidget implements FormActions {
           _categoriesFormState.openSettings();
         }
         break;
+      case AppActions.select:
+        {
+          _categoriesFormState.updateSelect();
+        }
+        break;
     }
+  }
+
+  @override
+  void registerParent(MainFormState mainForm) {
+    _mainForm = mainForm;
   }
 }
 
@@ -49,6 +62,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   bool refreshData = true;
   late ModelProvider<Category> categoryProvider;
   late ModelProvider<Note> noteProvider;
+  late MainFormState _mainForm;
 
   _CategoriesFormState() {
     categoryProvider = ModelProvider<Category>();
@@ -71,47 +85,49 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                            flex: 90,
-                            child: Text('${dataModel[index].model.name}')),
-                        Expanded(
-                            flex: 10,
-                            child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: new BoxDecoration(
-                                  color: Color(dataModel[index].model.color),
-                                  shape: BoxShape.circle,
-                                ))),
-                      ],
-                    ),
-                    onTap: () {
-                      if (widget.mode == FormModes.select) {
-                        Navigator.pop(context, dataModel[index]);
-                      } else {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditCategoryForm(
-                                        category: dataModel[index].model)))
-                            .then((value) {
-                          setState(() {
-                            refreshData = true;
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                              flex: 90,
+                              child: Text('${dataModel[index].model.name}')),
+                          Expanded(
+                              flex: 10,
+                              child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: new BoxDecoration(
+                                    color: Color(dataModel[index].model.color),
+                                    shape: BoxShape.circle,
+                                  ))),
+                        ],
+                      ),
+                      onTap: () {
+                        if (widget.mode == FormModes.select) {
+                          Navigator.pop(context, dataModel[index]);
+                        } else {
+                          Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => EditCategoryForm(
+                                          category: dataModel[index].model)))
+                              .then((value) {
+                            setState(() {
+                              refreshData = true;
+                            });
                           });
-                        });
-                      }
-                    },
-                    trailing:  Checkbox(
+                        }
+                      },
+                      trailing: Visibility(
+                        visible: _mainForm.select,
+                        child: Checkbox(
                           value: dataModel[index].isSelected,
                           onChanged: (bool? value) {
                             dataModel[index].isSelected = value!;
                             setState(() {});
                           },
                         ),
-                  );
+                      ));
                 },
                 separatorBuilder: (BuildContext context, int index) =>
                     const Divider(),
@@ -133,11 +149,11 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      categoriesUsed = (await categoryProvider.rawQuery('select distinct( id_category ) as idCategory from notes'))
-            .map((item){
-                return item['idCategory'] as int;
-              })
-            .toList();
+      categoriesUsed = (await categoryProvider.rawQuery(
+              'select distinct( id_category ) as idCategory from notes'))
+          .map((item) {
+        return item['idCategory'] as int;
+      }).toList();
       dataModel = (await categoryProvider.getAll(Category.getDummyReference()))
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
@@ -170,13 +186,20 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
     bool deleted = false;
 
     dataModel.forEach((item) {
-      if (item.isSelected  ) {
-        if ( !categoriesUsed.contains(item.model.id) ) {
-          deleted = true;
-          categoryProvider.delete(item.model);
+      if (item.isSelected) {
+        if (!categoriesUsed.contains(item.model.id)) {
+          if (item.model.id != 1) {
+            deleted = true;
+            categoryProvider.delete(item.model);
+          } else
+            {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("This category can't be deleted."),
+              ));
+            }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.loc!.categoryUsedInNotes(item.model.name)),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.loc!.categoryUsedInNotes(item.model.name)),
           ));
         }
       }
@@ -197,5 +220,17 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   void openSettings() {
     showSettings(context, (value) {});
+  }
+
+  void registerParent(MainFormState mainForm) {
+    _mainForm = mainForm;
+  }
+
+  void updateSelect() {
+    setState(() {
+      if (_mainForm != null) {
+        _mainForm!.changeVisibility();
+      }
+    });
   }
 }

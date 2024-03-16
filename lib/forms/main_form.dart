@@ -12,32 +12,34 @@ class MainForm extends StatefulWidget {
   const MainForm();
 
   @override
-  _MainFormState createState() {
-    return _MainFormState();
+  MainFormState createState() {
+    return MainFormState();
   }
 }
 
 // Create a corresponding State class.
 // This class holds data related to the form.
-class _MainFormState extends State<MainForm> {
+class MainFormState extends State<MainForm> {
   late List<Widget> _forms;
   late List<List<Widget>> _actions;
   int _currentForm = 0;
+  bool select = false;
 
-  _MainFormState() {
+  MainFormState() {
     _forms = [
       NotesForm(mode: FormModes.edit),
       CategoriesForm(mode: FormModes.edit)
     ];
     _actions = _buildActions();
+    _forms.forEach((form) {
+      (form as FormActions).registerParent(this);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     l10n.loc = AppLocalizations.of(context);
     var appTitle = l10n.loc!.appTitle;
-
-
 
     return MaterialApp(
       title: appTitle,
@@ -78,29 +80,40 @@ class _MainFormState extends State<MainForm> {
     final List<List<Widget>> actionList = [[], []];
 
     for (var index in [0, 1]) {
+      actionList[index].add(Visibility(
+          visible: select,
+          child: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: () {
+                _callOnAction(index, AppActions.delete);
+              })));
       actionList[index].add(IconButton(
-          icon: const Icon(Icons.delete, color: Colors.white),
+          icon: const Icon(Icons.select_all, color: Colors.white),
           onPressed: () {
-            _callOnAction(index, AppActions.delete);
-          }));
-      actionList[index].add(IconButton(
-          icon: const Icon(Icons.settings, color: Colors.white),
-          onPressed: () {
-            _callOnAction(index, AppActions.settings);
+            _callOnAction(index, AppActions.select);
           }));
     }
+
     // add additional menu for notes.
     actionList[0].add(
       PopupMenuButton<int>(
         onSelected: (index) => _callOnAdditionalMenu(index),
         itemBuilder: (context) => [
           PopupMenuItem<int>(
-              value: 0,
-              child:  Text('Export'),
+            value: 0,
+            child: Text('Export'),
           ),
-          PopupMenuItem<int>(
-              value: 1,
-              child: Text('Import')),
+          PopupMenuItem<int>(value: 1, child: Text('Import')),
+          PopupMenuDivider(),
+          PopupMenuItem<int>(value: 2, child: Text('Settings')),
+        ],
+      ),
+    );
+    actionList[1].add(
+      PopupMenuButton<int>(
+        onSelected: (index) => _callOnAdditionalMenu(index),
+        itemBuilder: (context) => [
+          PopupMenuItem<int>(value: 2, child: Text('Settings')),
         ],
       ),
     );
@@ -119,6 +132,15 @@ class _MainFormState extends State<MainForm> {
       case 1:
         (_forms[0] as FormActions).onAction(AppActions.import);
         break;
+      case 2:
+        (_forms[0] as FormActions).onAction(AppActions.settings);
     }
+  }
+
+  void changeVisibility() {
+    setState(() {
+      select = !select;
+      _actions = _buildActions();
+    });
   }
 }

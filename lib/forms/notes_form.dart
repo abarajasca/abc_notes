@@ -5,26 +5,28 @@ import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
-import 'package:flutter/widgets.dart';
 import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'main_form.dart';
+
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _NotesFormState _notesFormState;
+  late MainFormState _mainForm; 
 
   NotesForm({Key? key, required this.mode}) : super(key: key);
 
   @override
   State<NotesForm> createState() {
     _notesFormState = _NotesFormState();
+    _notesFormState.registerParent(_mainForm);
     return _notesFormState;
   }
 
@@ -52,7 +54,17 @@ class NotesForm extends StatefulWidget implements FormActions {
           _notesFormState.openSettings();
         }
         break;
+      case AppActions.select:
+        {
+          _notesFormState.updateSelect();
+        }
+        break;
     }
+  }
+
+  @override
+  void registerParent(MainFormState mainForm ) {
+    _mainForm = mainForm;
   }
 }
 
@@ -61,6 +73,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
   bool refreshData = true;
   late ModelProvider<Note> noteProvider;
   late ModelProvider<Category> categoryProvider;
+  late MainFormState _mainForm;
 
   _NotesFormState() {
     noteProvider = ModelProvider<Note>();
@@ -98,7 +111,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
                                 fontSize: 10,
                                 background: Paint()
                                   ..color = Color(category.color)
-                                  ..strokeWidth = 15
+                                  ..strokeWidth = 18
                                   ..strokeJoin = StrokeJoin.round
                                   ..strokeCap = StrokeCap.round
                                   ..style = PaintingStyle.stroke,
@@ -123,14 +136,19 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         });
                       }
                     },
-                    trailing:
-                        Checkbox(
+                    trailing: Visibility(
+                      visible: _mainForm!.select,
+
+                      child: Checkbox(
                         value: dataModel[index].isSelected,
                         onChanged: (bool? value) {
-                          dataModel[index].isSelected = value!;
-                          setState(() {});
+                          setState(() {
+                            dataModel[index].isSelected = value!;
+                            refreshData = false;
+                          });
                         },
                       ),
+                    ),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -153,6 +171,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
+      print('refresh data');
       List<Category> categories =
           (await categoryProvider.getAll(Category.getDummyReference()));
       dataModel = (await noteProvider.getAll(Note.getDummyReference()))
@@ -168,6 +187,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
       });
       refreshData = false;
     }
+    print('fetch data');
     return dataModel;
   }
 
@@ -216,51 +236,62 @@ class _NotesFormState extends State<NotesForm> with Settings {
   }
 
   Future<void> exportNotes() async {
-    if (dataModel.any((element) => element.isSelected)){
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
+    if (dataModel.any((element) => element.isSelected)) {
+      String? selectedDirectory = await FilePicker.platform
+          .getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
       if (selectedDirectory != null) {
         if (await Permission.manageExternalStorage.request().isGranted) {
-          dataModel.where((element) => element.isSelected).forEach((
-              element) async {
-            String nameFilePath = '$selectedDirectory/${element.model
-                .title}.txt';
-            String bodyContent = 'category:${element.model.category.name}\n\n${element.model.body}';
+          dataModel
+              .where((element) => element.isSelected)
+              .forEach((element) async {
+            String nameFilePath =
+                '$selectedDirectory/${element.model.title}.txt';
+            String bodyContent =
+                'category:${element.model.category.name}\n\n${element.model.body}';
             await File(nameFilePath).writeAsString(bodyContent);
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.loc!.notesExporterIn(selectedDirectory)))
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(l10n.loc!.notesExporterIn(selectedDirectory))));
         }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.loc!.selectNotesToExport))
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.loc!.selectNotesToExport)));
     }
   }
 
   Future<void> importNotes() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true,type: FileType.custom, allowedExtensions: ['txt']);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true, type: FileType.custom, allowedExtensions: ['txt']);
 
-    if (result != null)  {
+    if (result != null) {
       int idCategory = 1;
       List<File> files = result.paths.map((path) => File(path!)).toList();
       files.forEach((file) async {
         var nameFile = file.path.split('/').last;
         var body = await file.readAsStringSync();
         var bodyClean = body.split('\n').first;
-        if (bodyClean.contains('category:')){
+        if (bodyClean.contains('category:')) {
           var categoryName = bodyClean.split(':').last;
-          var categoryList = await categoryProvider.getAll(Category.getDummyReference(),where: "name='${categoryName}'");
-          if (categoryList.isEmpty){  // Create category
+          var categoryList = await categoryProvider.getAll(
+              Category.getDummyReference(),
+              where: "name='${categoryName}'");
+          if (categoryList.isEmpty) {
+            // Create category
             var randColor = Random().nextInt(Colors.primaries.length);
-            idCategory = (await categoryProvider.insert(Category(name: categoryName,color: Colors.primaries[randColor].value )))!;
+            idCategory = (await categoryProvider.insert(Category(
+                name: categoryName,
+                color: Colors.primaries[randColor].value)))!;
           } else {
             idCategory = categoryList.first.id!;
           }
           body = body.replaceFirst(bodyClean + '\n\n', '');
         }
-        await noteProvider.insert(Note(title: nameFile.split('.').first,body: body,idCategory: idCategory,date: "01/01/01"));
+        await noteProvider.insert(Note(
+            title: nameFile.split('.').first,
+            body: body,
+            idCategory: idCategory,
+            date: "01/01/01"));
       });
       setState(() {
         refreshData = true;
@@ -268,5 +299,17 @@ class _NotesFormState extends State<NotesForm> with Settings {
     } else {
       // User canceled the picker
     }
+  }
+
+  void updateSelect() {
+    setState(() {
+      if (_mainForm != null){
+        _mainForm!.changeVisibility();
+      }
+    });
+  }
+
+  void registerParent(MainFormState mainForm) {
+    _mainForm = mainForm;
   }
 }
