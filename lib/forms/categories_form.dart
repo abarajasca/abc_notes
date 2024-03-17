@@ -118,16 +118,14 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                           });
                         }
                       },
-                      trailing: Visibility(
-                        visible: _mainForm.select,
-                        child: Checkbox(
+                      trailing: _mainForm.select == true ?  Checkbox(
                           value: dataModel[index].isSelected,
                           onChanged: (bool? value) {
                             dataModel[index].isSelected = value!;
                             setState(() {});
                           },
-                        ),
-                      ));
+                      ) : null,
+                  );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
                     const Divider(),

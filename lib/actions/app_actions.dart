@@ -7,7 +7,8 @@ enum AppActions {
     settings,
     export,
     import,
-    select
+    select,
+    search
 }
 
 abstract class FormActions {

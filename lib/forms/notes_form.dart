@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
+import 'package:abc_notes/forms/search_form.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
@@ -19,7 +20,7 @@ import 'main_form.dart';
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _NotesFormState _notesFormState;
-  late MainFormState _mainForm; 
+  late MainFormState _mainForm;
 
   NotesForm({Key? key, required this.mode}) : super(key: key);
 
@@ -59,11 +60,14 @@ class NotesForm extends StatefulWidget implements FormActions {
           _notesFormState.updateSelect();
         }
         break;
+      case AppActions.search:
+        _notesFormState.search();
+        break;
     }
   }
 
   @override
-  void registerParent(MainFormState mainForm ) {
+  void registerParent(MainFormState mainForm) {
     _mainForm = mainForm;
   }
 }
@@ -125,9 +129,10 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         Navigator.pop(context, dataModel[index]);
                       } else {
                         Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditNoteForm(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EditNoteForm(
                                         note: dataModel[index].model)))
                             .then((value) {
                           setState(() {
@@ -136,19 +141,15 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         });
                       }
                     },
-                    trailing: Visibility(
-                      visible: _mainForm!.select,
-
-                      child: Checkbox(
-                        value: dataModel[index].isSelected,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            dataModel[index].isSelected = value!;
-                            refreshData = false;
-                          });
-                        },
-                      ),
-                    ),
+                    trailing: _mainForm!.select == true ?  Checkbox(
+                      value: dataModel[index].isSelected,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          dataModel[index].isSelected = value!;
+                          refreshData = false;
+                        });
+                      },
+                    ) : null,
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -171,7 +172,6 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      print('refresh data');
       List<Category> categories =
           (await categoryProvider.getAll(Category.getDummyReference()));
       dataModel = (await noteProvider.getAll(Note.getDummyReference()))
@@ -187,7 +187,6 @@ class _NotesFormState extends State<NotesForm> with Settings {
       });
       refreshData = false;
     }
-    print('fetch data');
     return dataModel;
   }
 
@@ -303,7 +302,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   void updateSelect() {
     setState(() {
-      if (_mainForm != null){
+      if (_mainForm != null) {
         _mainForm!.changeVisibility();
       }
     });
@@ -311,5 +310,25 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   void registerParent(MainFormState mainForm) {
     _mainForm = mainForm;
+  }
+
+  void search() {
+    showSearch(context: context, delegate: SearchForm(dataModel: dataModel))
+        .then((idQuery) {
+      if (idQuery != null) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EditNoteForm(
+                    note: dataModel
+                        .where((item) => item.model.id == idQuery)
+                        .first
+                        .model))).then((value) {
+          setState(() {
+            refreshData = true;
+          });
+        });
+      }
+    });
   }
 }

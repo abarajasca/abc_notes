@@ -79,6 +79,12 @@ class MainFormState extends State<MainForm> {
   List<List<Widget>> _buildActions() {
     final List<List<Widget>> actionList = [[], []];
 
+    actionList[0].add(IconButton(
+        icon: const Icon(Icons.search, color: Colors.white),
+        onPressed: () {
+          _callOnAction(0, AppActions.search);
+        }));
+
     for (var index in [0, 1]) {
       actionList[index].add(Visibility(
           visible: select,
