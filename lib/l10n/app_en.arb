@@ -61,5 +61,6 @@
       }
     }
   },
-  "selectNotesToExport": "Select notes to export."
+  "selectNotesToExport": "Select notes to export.",
+  "categoryCantBeDeleted": "This category can't be deleted."
 }

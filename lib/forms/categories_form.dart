@@ -192,7 +192,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
           } else
             {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("This category can't be deleted."),
+                content: Text(l10n.loc!.categoryCantBeDeleted),
               ));
             }
         } else {

@@ -1,29 +1,8 @@
 import 'package:flutter/material.dart';
-
-import '../database/models/note.dart';
-import '../database/models/category.dart';
-import '../database/providers/model_provider.dart';
 import '../util/selectable.dart';
 
 class SearchForm extends SearchDelegate {
   List<Selectable> dataModel;
-  final List<String> searchList = [
-    "Apple",
-    "Banana",
-    "Cherry",
-    "Date",
-    "Fig",
-    "Grapes",
-    "Kiwi",
-    "Lemon",
-    "Mango",
-    "Orange",
-    "Papaya",
-    "Raspberry",
-    "Strawberry",
-    "Tomato",
-    "Watermelon",
-  ];
 
   SearchForm({required this.dataModel});
 
