@@ -165,6 +165,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
           addNote();
         },
         backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         child: Icon(Icons.add),
       ),
     );

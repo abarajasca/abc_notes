@@ -56,7 +56,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
         backgroundColor: Colors.green,
         title: Text(
           _editMode() ? l10n.loc!.editNote : l10n.loc!.addNote,
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 18,color: Colors.white),
         ),
         centerTitle: false,
       ),
@@ -162,7 +162,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
           saveNote();
         },
         backgroundColor: Colors.green,
-        child: Icon(Icons.save),
+        child: Icon(Icons.save,color: Colors.white),
       ),
     );
   }

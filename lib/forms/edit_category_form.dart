@@ -56,7 +56,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
         backgroundColor: Colors.green,
         title: Text(
           _editMode() ? l10n.loc!.editCategory : l10n.loc!.addCategory,
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 18,color: Colors.white),
         ),
         centerTitle: false,
       ),
@@ -97,7 +97,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
           saveCategory();
         },
         backgroundColor: Colors.green,
-        child: Icon(Icons.save),
+        child: Icon(Icons.save,color: Colors.white),
       ),
     );
   }

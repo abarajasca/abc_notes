@@ -42,11 +42,18 @@ class MainFormState extends State<MainForm> {
     var appTitle = l10n.loc!.appTitle;
 
     return MaterialApp(
+      theme: ThemeData(
+          appBarTheme: AppBarTheme(
+              iconTheme: IconThemeData(
+                  color: Colors.white
+              )
+          )
+      ),
       title: appTitle,
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
-          title: Text(appTitle, style: TextStyle(fontSize: 18)),
+          title: Text(appTitle, style: TextStyle(fontSize: 18,color: Colors.white)),
           actions: _actions[_currentForm],
         ),
         body: _forms[_currentForm],
@@ -103,6 +110,7 @@ class MainFormState extends State<MainForm> {
     // add additional menu for notes.
     actionList[0].add(
       PopupMenuButton<int>(
+        icon: Icon(Icons.more_vert,color: Colors.white),
         onSelected: (index) => _callOnAdditionalMenu(index),
         itemBuilder: (context) => [
           PopupMenuItem<int>(

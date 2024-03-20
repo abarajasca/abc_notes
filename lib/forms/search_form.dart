@@ -1,8 +1,13 @@
+import 'package:abc_notes/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import '../util/selectable.dart';
+import '../l10n/l10n.dart';
 
 class SearchForm extends SearchDelegate {
   List<Selectable> dataModel;
+
+  @override
+  String get searchFieldLabel => l10n.loc!.search;
 
   SearchForm({required this.dataModel});
 
@@ -81,4 +86,33 @@ class SearchForm extends SearchDelegate {
       },
     );
   }
+
+  ThemeData appBarTheme(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    return theme.copyWith(
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(
+            color: Colors.white
+        ),
+        titleTextStyle: TextStyle(color:Colors.white),
+        toolbarTextStyle: theme.textTheme.bodyMedium,
+      ),
+      textTheme: TextTheme(
+        titleLarge: TextStyle(
+          color: Colors.white,
+          fontSize: 18
+        ),
+      ),
+      hintColor: Colors.white,
+
+      inputDecorationTheme: searchFieldDecorationTheme ??
+          InputDecorationTheme(
+            hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
+            border: InputBorder.none,
+          ),
+    );
+  }
+
 }

@@ -17,7 +17,8 @@ class SettingsForm extends StatelessWidget with CustomForms {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.loc!.configurations, style: TextStyle(fontSize: 18)),
+        backgroundColor: Colors.green,
+        title: Text(l10n.loc!.configurations, style: TextStyle(fontSize: 18,color: Colors.white)),
         centerTitle: false,
         actions: <Widget>[
           IconButton(

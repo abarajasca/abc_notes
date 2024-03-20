@@ -140,6 +140,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
           addCategory();
         },
         backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         child: Icon(Icons.add),
       ),
     );
