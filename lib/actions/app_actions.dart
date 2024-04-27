@@ -8,7 +8,9 @@ enum AppActions {
     export,
     import,
     select,
-    search
+    search,
+    sort_title,
+    sort_category
 }
 
 abstract class FormActions {

@@ -63,6 +63,12 @@ class NotesForm extends StatefulWidget implements FormActions {
       case AppActions.search:
         _notesFormState.search();
         break;
+      case AppActions.sort_title:
+        _notesFormState.sort_title();
+        break;
+      case AppActions.sort_category:
+        _notesFormState.sort_category();
+        break;
     }
   }
 
@@ -330,6 +336,38 @@ class _NotesFormState extends State<NotesForm> with Settings {
           });
         });
       }
+    });
+  }
+
+  void sort_title() {
+    setState(() {
+      refreshData = false;
+      dataModel.sort((a, b) {
+        var x = a;
+        var y = b;
+        if (_mainForm!.sort_title == false) {
+           x = b;
+           y = a;
+        }
+        return x.model.title.compareTo(y.model.title);
+      });
+      _mainForm.changeSortType(AppActions.sort_title);
+    });
+  }
+
+  void sort_category() {
+    setState(() {
+      refreshData = false;
+      dataModel.sort((a, b) {
+        var x = a;
+        var y = b;
+        if (_mainForm!.sort_category == false) {
+          x = b;
+          y = a;
+        }
+        return x.model.category.name.compareTo(y.model.category.name);
+      });
+      _mainForm.changeSortType(AppActions.sort_category);
     });
   }
 }

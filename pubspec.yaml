@@ -43,6 +43,14 @@ dev_dependencies:
   mockito: ^5.4.2
   build_runner: ^2.4.6
 
+  flutter_native_splash: ^2.0.1+1
+
+flutter_native_splash:
+  #color: "#4CAF50"
+  color: "#000000"
+  image: assets/abc_notes.png
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
