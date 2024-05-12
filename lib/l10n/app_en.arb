@@ -63,5 +63,11 @@
   },
   "selectNotesToExport": "Select notes to export.",
   "categoryCantBeDeleted": "This category can't be deleted.",
-  "search": "Search"
+  "search": "Search",
+  "sortByTime": "Sort by Time",
+  "sortByTitle": "Sort by Title",
+  "sortByCategory": "Sort by Category",
+  "export": "Export",
+  "import": "Import",
+  "settings": "Settings"
 }

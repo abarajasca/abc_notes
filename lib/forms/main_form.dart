@@ -24,8 +24,10 @@ class MainFormState extends State<MainForm> {
   late List<List<Widget>> _actions;
   int _currentForm = 0;
   bool select = false;
-  bool sort_title = false;
-  bool sort_category = false;
+  bool sort_title = true;
+  bool sort_category = true;
+  bool sort_time = true;
+  AppActions sort_type = AppActions.sort_title;
 
   MainFormState() {
     _forms = [
@@ -118,18 +120,29 @@ class MainFormState extends State<MainForm> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Sort by Title'),
-                Icon( sort_title ?  Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18),
+                Text(l10n.loc!.sortByTime),
+                Icon( sort_time ?  Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18),
               ],
             ),
           ),
           PopupMenuItem<int>(
             value: 1,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.loc!.sortByTitle),
+                Icon( sort_title ?  Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18),
+              ],
+            ),
+          ),
+          PopupMenuItem<int>(
+            value: 2,
+            child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Sort by Category'),
+                  Text(l10n.loc!.sortByCategory),
                   Icon(sort_category ? Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18)
                 ]),
           )
@@ -137,26 +150,40 @@ class MainFormState extends State<MainForm> {
       ),
     );
     // add additional menu for notes.
+
     actionList[0].add(
       PopupMenuButton<int>(
         icon: Icon(Icons.more_vert, color: Colors.white),
         onSelected: (index) => _callOnAdditionalMenu(1, index),
-        itemBuilder: (context) => [
-          PopupMenuItem<int>(
-            value: 0,
-            child: Text('Export'),
-          ),
-          PopupMenuItem<int>(value: 1, child: Text('Import')),
-          PopupMenuDivider(),
-          PopupMenuItem<int>(value: 2, child: Text('Settings')),
-        ],
+        itemBuilder: (context){
+          List<PopupMenuEntry<int>> menuItemsAdditional = [];
+          if (select ) {
+            menuItemsAdditional = [
+              PopupMenuItem<int>(value: 0, child: Text(l10n.loc!.export)),
+              PopupMenuItem<int>(value: 1, child: Text(l10n.loc!.import)),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(value: 2, child: Text('Select all')),
+              PopupMenuItem<int>(value: 3, child: Text('Unselect all')),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(value: 4, child: Text(l10n.loc!.settings)),
+            ];
+          } else {
+            menuItemsAdditional = [
+              PopupMenuItem<int>(value: 1, child: Text(l10n.loc!.import)),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(value: 4, child: Text(l10n.loc!.settings))
+            ];
+          }
+          return menuItemsAdditional;
+        },
       ),
     );
+    // Add additional menu for Categoriew.
     actionList[1].add(
       PopupMenuButton<int>(
         onSelected: (index) => _callOnAdditionalMenu(1, index),
         itemBuilder: (context) => [
-          PopupMenuItem<int>(value: 2, child: Text('Settings')),
+          PopupMenuItem<int>(value: 2, child: Text(l10n.loc!.settings)),
         ],
       ),
     );
@@ -172,9 +199,12 @@ class MainFormState extends State<MainForm> {
       case 0:
         switch (index) {
           case 0:
-            (_forms[0] as FormActions).onAction(AppActions.sort_title);
+            (_forms[0] as FormActions).onAction(AppActions.sort_time);
             break;
           case 1:
+            (_forms[0] as FormActions).onAction(AppActions.sort_title);
+            break;
+          case 2:
             (_forms[0] as FormActions).onAction(AppActions.sort_category);
             break;
         }
@@ -188,7 +218,14 @@ class MainFormState extends State<MainForm> {
             (_forms[0] as FormActions).onAction(AppActions.import);
             break;
           case 2:
+            (_forms[0] as FormActions).onAction(AppActions.select_all);
+            break;
+          case 3:
+            (_forms[0] as FormActions).onAction(AppActions.unselect_all);
+            break;
+          case 4:
             (_forms[0] as FormActions).onAction(AppActions.settings);
+            break;
         }
         break;
     }
@@ -210,7 +247,12 @@ class MainFormState extends State<MainForm> {
           break;
         case AppActions.sort_category:
           sort_category = !sort_category;
+          break;
+        case AppActions.sort_time:
+          sort_time = !sort_time;
+          break;
       }
+      sort_type = action;
       _actions = _buildActions();
     });
   }

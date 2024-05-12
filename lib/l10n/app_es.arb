@@ -65,5 +65,11 @@
   },
   "selectNotesToExport": "Selecione notas a exportar.",
   "categoryCantBeDeleted": "Esta categoria no se puede borrar.",
-  "search": "Buscar"
+  "search": "Buscar",
+  "sortByTime": "Ordenar por hora",
+  "sortByTitle": "Ordenar por titulo",
+  "sortByCategory": "Ordenar por categoria",
+  "export": "Exportar",
+  "import": "Importar",
+  "settings": "Configurationes"
 }

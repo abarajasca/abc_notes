@@ -6,6 +6,7 @@ import '../database/providers/model_provider.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../l10n/l10n.dart';
+import '../util/DateUtil.dart';
 
 class EditNoteForm extends StatefulWidget {
   Note? note;
@@ -23,7 +24,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   final title = TextEditingController();
   final body = TextEditingController();
-  final date = TextEditingController();
+  String created_at ='';
+  String updated_at ='';
   int idCategory = 0;
 
   Note? note;
@@ -38,7 +40,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   void loadFields() {
     title.text = note != null ? note!.title : '';
     body.text = note != null ? note!.body : '';
-    date.text = note != null ? note!.date : '2000-01-01';
+    created_at = note != null ? note!.created_at : '';
+    updated_at = note != null ? note!.updated_at : '';
     idCategory = note != null ? note!.idCategory : 1;
   }
 
@@ -77,6 +80,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                         TextInputType.text,
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^.{0,50}$'))),
+                    Text('' ),
+                    Text('Last update: ${DateUtil.formatUIDateTime(updated_at)}'),
                     FutureBuilder<List<Category>>(
                         future: fetchCategories(),
                         builder: (context, snapshot) {
@@ -169,7 +174,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   void saveNote() {
     if (_formKey.currentState!.validate()) {
-      save(context, title.text, body.text, date.text, idCategory);
+      save(context, title.text, body.text, idCategory);
     }
   }
 
@@ -177,17 +182,23 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
     BuildContext context,
     String title,
     String body,
-    String date,
     int idCategory,
   ) async {
     int? newId = 0;
     String message = '';
 
+    if (_editMode()){
+      updated_at = DateUtil.getCurrentDateTime();
+    } else {
+      created_at = DateUtil.getCurrentDateTime();
+      updated_at = created_at;
+    }
     newId = await noteProvider.insert(Note(
         id: _editMode() ? note!.id : null,
         title: title,
         body: body,
-        date: date,
+        created_at: created_at,
+        updated_at: updated_at,
         idCategory: idCategory));
     if (newId != 0) {
       message = l10n.loc!.noteSaved(title);

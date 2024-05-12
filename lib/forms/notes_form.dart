@@ -16,6 +16,7 @@ import 'form_modes.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'main_form.dart';
+import '../util/DateUtil.dart';
 
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
@@ -69,6 +70,15 @@ class NotesForm extends StatefulWidget implements FormActions {
       case AppActions.sort_category:
         _notesFormState.sort_category();
         break;
+      case AppActions.sort_time:
+        _notesFormState.sort_time();
+        break;
+      case AppActions.select_all:
+        _notesFormState.select_all();
+        break;
+      case AppActions.unselect_all:
+        _notesFormState.unselect_all();
+        break;
     }
   }
 
@@ -107,38 +117,43 @@ class _NotesFormState extends State<NotesForm> with Settings {
                 itemBuilder: (BuildContext context, int index) {
                   Category category = dataModel[index].model.category;
                   return ListTile(
-                    title: Row(
-                      children: [
-                        Expanded(
-                            flex: 75,
-                            child: Text('${dataModel[index].model.title}')),
-                        Expanded(
-                          flex: 25,
-                          child: Text(
-                            category.name,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 10,
-                                background: Paint()
-                                  ..color = Color(category.color)
-                                  ..strokeWidth = 18
-                                  ..strokeJoin = StrokeJoin.round
-                                  ..strokeCap = StrokeCap.round
-                                  ..style = PaintingStyle.stroke,
-                                color: Colors.white),
+                    title: Column(children: [
+                      Row(
+                        children: [
+                          Expanded(
+                              flex: 75,
+                              child: Text('${dataModel[index].model.title}')),
+                          Expanded(
+                            flex: 25,
+                            child: Text(
+                              category.name,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  background: Paint()
+                                    ..color = Color(category.color)
+                                    ..strokeWidth = 18
+                                    ..strokeJoin = StrokeJoin.round
+                                    ..strokeCap = StrokeCap.round
+                                    ..style = PaintingStyle.stroke,
+                                  color: Colors.white),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                      Row(children: [
+                        Text('${dataModel[index].model.updated_at}',
+                            style: TextStyle(fontSize: 10))
+                      ])
+                    ]),
                     onTap: () {
                       if (widget.mode == FormModes.select) {
                         Navigator.pop(context, dataModel[index]);
                       } else {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    EditNoteForm(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditNoteForm(
                                         note: dataModel[index].model)))
                             .then((value) {
                           setState(() {
@@ -147,15 +162,17 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         });
                       }
                     },
-                    trailing: _mainForm!.select == true ?  Checkbox(
-                      value: dataModel[index].isSelected,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          dataModel[index].isSelected = value!;
-                          refreshData = false;
-                        });
-                      },
-                    ) : null,
+                    trailing: _mainForm!.select == true
+                        ? Checkbox(
+                            value: dataModel[index].isSelected,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                dataModel[index].isSelected = value!;
+                                refreshData = false;
+                              });
+                            },
+                          )
+                        : null,
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -185,15 +202,13 @@ class _NotesFormState extends State<NotesForm> with Settings {
           .map<Selectable<Note>>((Note note) {
         return Selectable(model: note, isSelected: false);
       }).toList();
-      dataModel.sort((a, b) {
-        return a.model.title.compareTo(b.model.title);
-      });
       dataModel.forEach((item) {
         item.model.category = categories
             .firstWhere((element) => element.id == item.model.idCategory);
       });
       refreshData = false;
     }
+    sort_data();
     return dataModel;
   }
 
@@ -293,11 +308,13 @@ class _NotesFormState extends State<NotesForm> with Settings {
           }
           body = body.replaceFirst(bodyClean + '\n\n', '');
         }
+        var now = DateUtil.getCurrentDateTime();
         await noteProvider.insert(Note(
             title: nameFile.split('.').first,
             body: body,
             idCategory: idCategory,
-            date: "01/01/01"));
+            created_at: now,
+            updated_at: now));
       });
       setState(() {
         refreshData = true;
@@ -339,18 +356,45 @@ class _NotesFormState extends State<NotesForm> with Settings {
     });
   }
 
+  void sort_data() {
+    bool sort_order = false;
+    switch (_mainForm.sort_type) {
+      case AppActions.sort_time:
+        sort_order = _mainForm.sort_time;
+        break;
+      case AppActions.sort_title:
+        sort_order = _mainForm.sort_title;
+        break;
+      case AppActions.sort_category:
+        sort_order = _mainForm.sort_category;
+        break;
+    }
+    dataModel.sort((a, b) {
+      var x = a;
+      var y = b;
+      int sort_result = 0;
+      if (sort_order == false) {
+        x = b;
+        y = a;
+      }
+      switch (_mainForm.sort_type) {
+        case AppActions.sort_time:
+          sort_result = x.model.created_at.compareTo(y.model.created_at);
+          break;
+        case AppActions.sort_title:
+          sort_result = x.model.title.compareTo(y.model.title);
+          break;
+        case AppActions.sort_category:
+          sort_result = x.model.category.name.compareTo(y.model.category.name);
+          break;
+      }
+      return sort_result;
+    });
+  }
+
   void sort_title() {
     setState(() {
       refreshData = false;
-      dataModel.sort((a, b) {
-        var x = a;
-        var y = b;
-        if (_mainForm!.sort_title == false) {
-           x = b;
-           y = a;
-        }
-        return x.model.title.compareTo(y.model.title);
-      });
       _mainForm.changeSortType(AppActions.sort_title);
     });
   }
@@ -358,16 +402,31 @@ class _NotesFormState extends State<NotesForm> with Settings {
   void sort_category() {
     setState(() {
       refreshData = false;
-      dataModel.sort((a, b) {
-        var x = a;
-        var y = b;
-        if (_mainForm!.sort_category == false) {
-          x = b;
-          y = a;
-        }
-        return x.model.category.name.compareTo(y.model.category.name);
-      });
       _mainForm.changeSortType(AppActions.sort_category);
+    });
+  }
+
+  void sort_time() {
+    setState(() {
+      refreshData = false;
+      _mainForm.changeSortType(AppActions.sort_time);
+    });
+  }
+
+  void select_all() {
+    mark_select(true);
+  }
+
+  void unselect_all() {
+    mark_select(false);
+  }
+
+  void mark_select(bool value) {
+    setState(() {
+      refreshData = false;
+      dataModel.forEach((element) {
+        element.isSelected = value;
+      });
     });
   }
 }

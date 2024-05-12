@@ -10,7 +10,10 @@ enum AppActions {
     select,
     search,
     sort_title,
-    sort_category
+    sort_category,
+    sort_time,
+    select_all,
+    unselect_all
 }
 
 abstract class FormActions {
