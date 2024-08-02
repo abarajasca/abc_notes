@@ -5,11 +5,13 @@ import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
 import 'package:abc_notes/forms/search_form.dart';
+import 'package:abc_notes/util/general_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
 import '../mixins/settings.dart';
+import '../util/preferences.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
@@ -94,10 +96,21 @@ class _NotesFormState extends State<NotesForm> with Settings {
   late ModelProvider<Note> noteProvider;
   late ModelProvider<Category> categoryProvider;
   late MainFormState _mainForm;
+  bool showLastUpdate = false;
 
   _NotesFormState() {
     noteProvider = ModelProvider<Note>();
     categoryProvider = ModelProvider<Category>();
+  }
+
+  @override
+  initState() {
+    super.initState();
+    Preferences.readGeneralPreferences().then((generalPreferences) {
+      setState(() {
+        showLastUpdate = generalPreferences.showLastUpdate;
+      });
+    });
   }
 
   @override
@@ -142,8 +155,9 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         ],
                       ),
                       Row(children: [
-                        Text('${dataModel[index].model.updated_at}',
-                            style: TextStyle(fontSize: 10))
+                        if (showLastUpdate)
+                          Text('${DateUtil.formatUIDateTime(dataModel[index].model.updated_at)}',
+                              style: TextStyle(fontSize: 10))
                       ])
                     ]),
                     onTap: () {
@@ -163,15 +177,19 @@ class _NotesFormState extends State<NotesForm> with Settings {
                       }
                     },
                     trailing: _mainForm!.select == true
-                        ? Checkbox(
-                            value: dataModel[index].isSelected,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                dataModel[index].isSelected = value!;
-                                refreshData = false;
-                              });
-                            },
-                          )
+                        ? StatefulBuilder(
+                      builder: (BuildContext context,StateSetter setStateInternal) {
+                        return Checkbox(
+                          value: dataModel[index].isSelected,
+                          onChanged: (bool? value) {
+                            setStateInternal(() {
+                              dataModel[index].isSelected = value!;
+                              refreshData = false;
+                            });
+                          },
+                        );
+                      }
+                    )
                         : null,
                   );
                 },
@@ -253,7 +271,11 @@ class _NotesFormState extends State<NotesForm> with Settings {
   }
 
   void openSettings() {
-    showSettings(context, (value) {});
+    showSettings(context, (GeneralPreferences generalPreferences) async {
+      setState(() {
+        showLastUpdate = generalPreferences.showLastUpdate;
+      });
+    });
   }
 
   Future<void> exportNotes() async {

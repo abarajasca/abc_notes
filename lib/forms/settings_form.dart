@@ -5,13 +5,18 @@ import 'package:abc_notes/util/general_preferences.dart';
 import 'package:abc_notes/util/preferences.dart';
 import '../l10n/l10n.dart';
 
-class SettingsForm extends StatelessWidget with CustomForms {
+
+class SettingsForm extends StatefulWidget {
+  SettingsForm({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsForm> createState() => _SettingsFormState();
+}
+
+class _SettingsFormState extends State<SettingsForm> with CustomForms {
   final backgrounColor = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  SettingsForm({Key? key}) : super(key: key) {
-    _load();
-  }
+  bool showLastUpdate = true;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +42,17 @@ class SettingsForm extends StatelessWidget with CustomForms {
             key: _formKey,
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              BasicField(
-                  'TODO-HERE',
-                  'backgroundColor',
-                  backgrounColor,
-                  TextInputType.numberWithOptions(decimal: false),
-                  FilteringTextInputFormatter.allow(RegExp("^\\d*")))
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                      Text(l10n.loc!.showLastUpdate),
+                      Checkbox(value: showLastUpdate,
+                          onChanged: (bool? value){
+                        setState((){
+                          showLastUpdate = value!;
+                        });
+                      }),],
+                  ),
             ]),
           ),
         ),
@@ -50,20 +60,25 @@ class SettingsForm extends StatelessWidget with CustomForms {
     );
   }
 
-  void _load() async {
-    GeneralPreferences generalPreferences =
-        await Preferences.readGeneralPreferences();
-    //TODO: backgrounColor.text = generalPreferences.backgroundColor.toString();
+
+  @override
+  initState() {
+    super.initState();
+    Preferences.readGeneralPreferences().then((generalPreferences) {
+      setState(() {
+        showLastUpdate = generalPreferences.showLastUpdate;
+      });
+    });
   }
 
   void _save(BuildContext context) async {
-    //TODO
-    /*GeneralPreferences generalPreferences = GeneralPreferences(
-        decimalPlaces: int.parse(decimalPlaces.text),
-        inflation: double.parse(inflation.text));
+    GeneralPreferences generalPreferences = GeneralPreferences(
+      backgroundColor: 'Blue',
+      showLastUpdate: showLastUpdate
+        );
     await Preferences.saveGeneralPreferences(generalPreferences);
 
     Navigator.pop(context, generalPreferences);
-    */
+
   }
 }

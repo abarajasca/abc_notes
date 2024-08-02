@@ -9,7 +9,9 @@ mixin Settings {
         MaterialPageRoute(
             builder: (context) =>  SettingsForm())
     ).then((value) {
-        thenAction.call(value);
+        if (value != null) {
+          thenAction.call(value);
+        }
     });
   }
 }

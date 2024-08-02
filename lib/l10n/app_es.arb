@@ -39,7 +39,7 @@
   },
   "errorCategoryNotSave": "Error. Categoria not guardada",
 
-  "configurations": "Configurationes",
+  "configurations": "Configuracion",
 
   "valueRequired": "Un valor es requerido.",
 
@@ -71,5 +71,6 @@
   "sortByCategory": "Ordenar por categoria",
   "export": "Exportar",
   "import": "Importar",
-  "settings": "Configurationes"
+  "settings": "Configuracion",
+  "showLastUpdate": "Mostrar ultima actualizacion en Notas"
 }

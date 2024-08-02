@@ -1,7 +1,9 @@
+import 'package:abc_notes/util/hidden_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:abc_notes/actions/app_actions.dart';
 
+import '../util/preferences.dart';
 import 'categories_form.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
@@ -28,6 +30,7 @@ class MainFormState extends State<MainForm> {
   bool sort_category = true;
   bool sort_time = true;
   AppActions sort_type = AppActions.sort_title;
+  late final AppLifecycleListener _listener;
 
   MainFormState() {
     _forms = [
@@ -38,6 +41,74 @@ class MainFormState extends State<MainForm> {
     _forms.forEach((form) {
       (form as FormActions).registerParent(this);
     });
+  }
+
+  @override
+  initState() {
+    super.initState();
+    _listener = AppLifecycleListener(
+        onShow: () => print('onShow'),
+        onDetach: () => print('onDetach'),
+        onInactive: () {
+          HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
+              sortTitle: sort_title,
+              sortTime: sort_time,
+              sortCategory: sort_category);
+          Preferences.saveHiddenPreferences(hiddenPreferences);
+        },
+        onPause: () => print('onPause'),
+        onResume: () => {
+          Preferences.readHiddenPreferences().then( (hiddenPreferences) {
+            setState(() {
+              sort_type = _getSortType(hiddenPreferences.sortType);
+              sort_title = hiddenPreferences.sortTitle;
+              sort_time = hiddenPreferences.sortTime;
+              sort_category = hiddenPreferences.sortCategory;
+            });
+          })
+        },
+
+    );
+  }
+
+  @override
+  dispose() {
+    // TODO: implement dispose
+    HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
+        sortTitle: sort_title,
+        sortTime: sort_time,
+        sortCategory: sort_category);
+    Preferences.saveHiddenPreferences(hiddenPreferences);
+    _listener.dispose();
+    super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
+        sortTitle: sort_title,
+        sortTime: sort_time,
+        sortCategory: sort_category);
+    Preferences.saveHiddenPreferences(hiddenPreferences);
+    super.deactivate();
+  }
+
+
+  AppActions _getSortType(String sortType){
+    AppActions sortT = AppActions.sort_title;
+    switch(sortType){
+      case "sort_title":
+        sortT = AppActions.sort_title;
+        break;
+      case "sort_time":
+        sortT = AppActions.sort_time;
+        break;
+      case "sort_category":
+        sortT = AppActions.sort_category;
+        break;
+    }
+    return sortT;
   }
 
   @override

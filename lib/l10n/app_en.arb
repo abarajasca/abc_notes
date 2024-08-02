@@ -69,5 +69,6 @@
   "sortByCategory": "Sort by Category",
   "export": "Export",
   "import": "Import",
-  "settings": "Settings"
+  "settings": "Settings",
+  "showLastUpdate": "Show Last update in Note lists"
 }
