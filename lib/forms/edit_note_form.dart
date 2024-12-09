@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:abc_notes/database/store/store.dart';
+
 import '../database/models/category.dart';
 import '../database/models/note.dart';
-import '../database/providers/model_provider.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../l10n/l10n.dart';
@@ -19,7 +21,6 @@ class EditNoteForm extends StatefulWidget {
 
 class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   final _formKey = GlobalKey<FormState>();
-  late ModelProvider<Category> categoryProvider;
   late List<Category> _categoriesData;
 
   final title = TextEditingController();
@@ -29,12 +30,10 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   int idCategory = 0;
 
   Note? note;
-  late ModelProvider<Note> noteProvider;
+
 
   _EditNoteFormState({this.note}) {
     loadFields();
-    noteProvider = ModelProvider<Note>();
-    categoryProvider = ModelProvider<Category>();
   }
 
   void loadFields() {
@@ -193,7 +192,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
       created_at = DateUtil.getCurrentDateTime();
       updated_at = created_at;
     }
-    newId = await noteProvider.insert(Note(
+    newId = await Store.notes.insert(Note(
         id: _editMode() ? note!.id : null,
         title: title,
         body: body,
@@ -213,7 +212,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   Future<List<Category>> fetchCategories() async {
     _categoriesData =
-        (await categoryProvider.getAll(Category.getDummyReference()))
+        (await Store.categories.getAll(Category.getDummyReference()))
             .map((category) => Category(
                 id: category.id, name: category.name, color: category.color))
             .toList();

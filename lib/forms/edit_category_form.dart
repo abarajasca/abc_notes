@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
+
 import '../database/models/category.dart';
-import '../database/providers/model_provider.dart';
+import '../database/store/store.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
@@ -26,7 +27,6 @@ class _EditCategoryFormState extends State<EditCategoryForm>
   int _color = Colors.blue.value;
 
   Category? category;
-  late ModelProvider<Category> categoryProvider;
 
   late List<Selectable> dataModel = [];
   bool refreshData = true;
@@ -34,7 +34,6 @@ class _EditCategoryFormState extends State<EditCategoryForm>
 
   _EditCategoryFormState({this.category}) {
     loadFields();
-    categoryProvider = ModelProvider<Category>();
   }
 
   void loadFields() {
@@ -120,7 +119,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
     int? newId = 0;
     String message = '';
 
-    newId = await categoryProvider.insert(Category(
+    newId = await Store.categories.insert(Category(
         id: _editMode() ? category!.id : null,
         name: name,
         color: color

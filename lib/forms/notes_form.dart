@@ -1,22 +1,22 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/forms/edit_note_form.dart';
 import 'package:abc_notes/forms/search_form.dart';
 import 'package:abc_notes/util/general_preferences.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:abc_notes/actions/app_actions.dart';
+
+import '../database/store/store.dart';
 import '../mixins/settings.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import 'form_modes.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import 'main_form.dart';
 import '../util/DateUtil.dart';
 
@@ -93,15 +93,8 @@ class NotesForm extends StatefulWidget implements FormActions {
 class _NotesFormState extends State<NotesForm> with Settings {
   late List<Selectable> dataModel;
   bool refreshData = true;
-  late ModelProvider<Note> noteProvider;
-  late ModelProvider<Category> categoryProvider;
   late MainFormState _mainForm;
   bool showLastUpdate = false;
-
-  _NotesFormState() {
-    noteProvider = ModelProvider<Note>();
-    categoryProvider = ModelProvider<Category>();
-  }
 
   @override
   initState() {
@@ -215,8 +208,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
       List<Category> categories =
-          (await categoryProvider.getAll(Category.getDummyReference()));
-      dataModel = (await noteProvider.getAll(Note.getDummyReference()))
+          (await Store.categories.getAll(Category.getDummyReference()));
+      dataModel = (await Store.notes.getAll(Note.getDummyReference()))
           .map<Selectable<Note>>((Note note) {
         return Selectable(model: note, isSelected: false);
       }).toList();
@@ -253,7 +246,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
     dataModel.forEach((item) {
       if (item.isSelected) {
         deleted = true;
-        noteProvider.delete(item.model);
+        Store.notes.delete(item.model);
       }
     });
     return deleted;
@@ -314,13 +307,13 @@ class _NotesFormState extends State<NotesForm> with Settings {
         var bodyClean = body.split('\n').first;
         if (bodyClean.contains('category:')) {
           var categoryName = bodyClean.split(':').last;
-          var categoryList = await categoryProvider.getAll(
+          var categoryList = await Store.categories.getAll(
               Category.getDummyReference(),
               where: "name='${categoryName}'");
           if (categoryList.isEmpty) {
             // Create category
             var randColor = Random().nextInt(Colors.primaries.length);
-            idCategory = (await categoryProvider.insert(Category(
+            idCategory = (await Store.categories.insert(Category(
                 name: categoryName,
                 color: Colors.primaries[randColor].value)))!;
           } else {
@@ -329,7 +322,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
           body = body.replaceFirst(bodyClean + '\n\n', '');
         }
         var now = DateUtil.getCurrentDateTime();
-        await noteProvider.insert(Note(
+        await Store.notes.insert(Note(
             title: nameFile.split('.').first,
             body: body,
             idCategory: idCategory,

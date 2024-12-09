@@ -1,9 +1,11 @@
+import 'package:abc_notes/database/providers/model_provider.dart';
+import 'package:flutter/material.dart';
+
+import 'package:abc_notes/actions/app_actions.dart';
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/forms/edit_category_form.dart';
-import 'package:flutter/material.dart';
-import 'package:abc_notes/database/providers/model_provider.dart';
-import 'package:abc_notes/actions/app_actions.dart';
-import '../database/models/note.dart';
+
+import '../database/store/store.dart';
 import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
@@ -60,14 +62,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   late List<Selectable> dataModel;
   late List<int> categoriesUsed;
   bool refreshData = true;
-  late ModelProvider<Category> categoryProvider;
-  late ModelProvider<Note> noteProvider;
   late MainFormState _mainForm;
-
-  _CategoriesFormState() {
-    categoryProvider = ModelProvider<Category>();
-    noteProvider = ModelProvider<Note>();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +143,12 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      categoriesUsed = (await categoryProvider.rawQuery(
+      categoriesUsed = (await Store.categories.rawQuery(
               'select distinct( id_category ) as idCategory from notes'))
           .map((item) {
         return item['idCategory'] as int;
       }).toList();
-      dataModel = (await categoryProvider.getAll(Category.getDummyReference()))
+      dataModel = (await  Store.categories.getAll(Category.getDummyReference()))
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
       dataModel.sort((a, b) {
@@ -189,7 +184,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
         if (!categoriesUsed.contains(item.model.id)) {
           if (item.model.id != 1) {
             deleted = true;
-            categoryProvider.delete(item.model);
+            Store.categories.delete(item.model);
           } else
             {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
