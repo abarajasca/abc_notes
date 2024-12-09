@@ -46,26 +46,18 @@ class MainFormState extends State<MainForm> {
   @override
   initState() {
     super.initState();
+
+    _readHiddenPreferences();
+
     _listener = AppLifecycleListener(
         onShow: () => print('onShow'),
         onDetach: () => print('onDetach'),
         onInactive: () {
-          HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
-              sortTitle: sort_title,
-              sortTime: sort_time,
-              sortCategory: sort_category);
-          Preferences.saveHiddenPreferences(hiddenPreferences);
+          _saveHiddenPreferences();
         },
         onPause: () => print('onPause'),
         onResume: () => {
-          Preferences.readHiddenPreferences().then( (hiddenPreferences) {
-            setState(() {
-              sort_type = _getSortType(hiddenPreferences.sortType);
-              sort_title = hiddenPreferences.sortTitle;
-              sort_time = hiddenPreferences.sortTime;
-              sort_category = hiddenPreferences.sortCategory;
-            });
-          })
+          _readHiddenPreferences()
         },
 
     );
@@ -73,24 +65,14 @@ class MainFormState extends State<MainForm> {
 
   @override
   dispose() {
-    // TODO: implement dispose
-    HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
-        sortTitle: sort_title,
-        sortTime: sort_time,
-        sortCategory: sort_category);
-    Preferences.saveHiddenPreferences(hiddenPreferences);
+    _saveHiddenPreferences();
     _listener.dispose();
     super.dispose();
   }
 
   @override
   void deactivate() {
-    // TODO: implement deactivate
-    HiddenPreferences hiddenPreferences = HiddenPreferences(sortType: sort_type.name,
-        sortTitle: sort_title,
-        sortTime: sort_time,
-        sortCategory: sort_category);
-    Preferences.saveHiddenPreferences(hiddenPreferences);
+    _saveHiddenPreferences();
     super.deactivate();
   }
 
@@ -192,7 +174,7 @@ class MainFormState extends State<MainForm> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.loc!.sortByTime),
-                Icon( sort_time ?  Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18),
+                Icon( sort_time ?  Icons.arrow_downward: Icons.arrow_upward   , color: Colors.black, size: 18),
               ],
             ),
           ),
@@ -203,7 +185,7 @@ class MainFormState extends State<MainForm> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(l10n.loc!.sortByTitle),
-                Icon( sort_title ?  Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18),
+                Icon( sort_title ? Icons.arrow_downward : Icons.arrow_upward , color: Colors.black, size: 18),
               ],
             ),
           ),
@@ -214,7 +196,7 @@ class MainFormState extends State<MainForm> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(l10n.loc!.sortByCategory),
-                  Icon(sort_category ? Icons.arrow_upward : Icons.arrow_downward , color: Colors.black, size: 18)
+                  Icon(sort_category ? Icons.arrow_downward : Icons.arrow_upward  , color: Colors.black, size: 18)
                 ]),
           )
         ],
@@ -326,5 +308,25 @@ class MainFormState extends State<MainForm> {
       sort_type = action;
       _actions = _buildActions();
     });
+  }
+
+  void _readHiddenPreferences(){
+    Preferences.readHiddenPreferences().then( (hiddenPreferences) {
+      setState(() {
+        sort_type = _getSortType(hiddenPreferences.sortType);
+        sort_title = hiddenPreferences.sortTitle;
+        sort_time = hiddenPreferences.sortTime;
+        sort_category = hiddenPreferences.sortCategory;
+      });
+    });
+  }
+
+  void _saveHiddenPreferences() {
+    HiddenPreferences hiddenPreferences = HiddenPreferences(
+        sortType: sort_type.name,
+        sortTitle: sort_title,
+        sortTime: sort_time,
+        sortCategory: sort_category);
+    Preferences.saveHiddenPreferences(hiddenPreferences);
   }
 }

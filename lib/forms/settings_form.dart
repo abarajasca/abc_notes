@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:abc_notes/mixins/custom_forms.dart';
 import 'package:abc_notes/util/general_preferences.dart';
 import 'package:abc_notes/util/preferences.dart';

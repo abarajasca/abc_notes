@@ -1,7 +1,6 @@
 import 'package:abc_notes/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import '../util/selectable.dart';
-import '../l10n/l10n.dart';
 
 class SearchForm extends SearchDelegate {
   List<Selectable> dataModel;

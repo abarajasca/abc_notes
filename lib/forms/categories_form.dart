@@ -227,9 +227,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
 
   void updateSelect() {
     setState(() {
-      if (_mainForm != null) {
-        _mainForm!.changeVisibility();
-      }
-    });
+      _mainForm.changeVisibility();
+        });
   }
 }

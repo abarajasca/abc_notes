@@ -176,7 +176,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
                         });
                       }
                     },
-                    trailing: _mainForm!.select == true
+                    trailing: _mainForm.select == true
                         ? StatefulBuilder(
                       builder: (BuildContext context,StateSetter setStateInternal) {
                         return Checkbox(
@@ -282,22 +282,20 @@ class _NotesFormState extends State<NotesForm> with Settings {
     if (dataModel.any((element) => element.isSelected)) {
       String? selectedDirectory = await FilePicker.platform
           .getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
-      if (selectedDirectory != null) {
-        if (await Permission.manageExternalStorage.request().isGranted) {
-          dataModel
-              .where((element) => element.isSelected)
-              .forEach((element) async {
-            String nameFilePath =
-                '$selectedDirectory/${element.model.title}.txt';
-            String bodyContent =
-                'category:${element.model.category.name}\n\n${element.model.body}';
-            await File(nameFilePath).writeAsString(bodyContent);
-          });
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(l10n.loc!.notesExporterIn(selectedDirectory))));
-        }
+      if (await Permission.manageExternalStorage.request().isGranted) {
+        dataModel
+            .where((element) => element.isSelected)
+            .forEach((element) async {
+          String nameFilePath =
+              '$selectedDirectory/${element.model.title}.txt';
+          String bodyContent =
+              'category:${element.model.category.name}\n\n${element.model.body}';
+          await File(nameFilePath).writeAsString(bodyContent);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.loc!.notesExporterIn(selectedDirectory!))));
       }
-    } else {
+        } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.loc!.selectNotesToExport)));
     }
@@ -348,10 +346,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   void updateSelect() {
     setState(() {
-      if (_mainForm != null) {
-        _mainForm!.changeVisibility();
-      }
-    });
+      _mainForm.changeVisibility();
+        });
   }
 
   void registerParent(MainFormState mainForm) {
@@ -391,17 +387,20 @@ class _NotesFormState extends State<NotesForm> with Settings {
         sort_order = _mainForm.sort_category;
         break;
     }
+
+    print("Shorting.. ${ _mainForm.sort_type } ${sort_order}");
+
     dataModel.sort((a, b) {
       var x = a;
       var y = b;
       int sort_result = 0;
-      if (sort_order == false) {
+      if (sort_order == false) {   // true: ascending , false: descending  Change this please !! for 'asc' 'desc'
         x = b;
         y = a;
       }
       switch (_mainForm.sort_type) {
         case AppActions.sort_time:
-          sort_result = x.model.created_at.compareTo(y.model.created_at);
+          sort_result = x.model.updated_at.compareTo(y.model.updated_at);
           break;
         case AppActions.sort_title:
           sort_result = x.model.title.compareTo(y.model.title);

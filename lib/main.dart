@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'forms/main_form.dart';
 
-void main() => runApp(const MaterialApp(
+
+void main(){
+    WidgetsFlutterBinding.ensureInitialized();
+
+    runApp(const MaterialApp(
       localizationsDelegates: [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -17,6 +23,7 @@ void main() => runApp(const MaterialApp(
       ],
       home: NotesApp(),
     ));
+}
 
 class NotesApp extends StatelessWidget {
   const NotesApp();

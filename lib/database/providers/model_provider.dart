@@ -30,7 +30,7 @@ class ModelProvider<T extends ModelBase> {
           conflictAlgorithm: ConflictAlgorithm.replace
       );
       return newId;
-    } on Exception catch(e){
+    } on Exception {
       return newId;
     }
   }
