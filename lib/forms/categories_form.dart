@@ -148,7 +148,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
           .map((item) {
         return item['idCategory'] as int;
       }).toList();
-      dataModel = (await  Store.categories.getAll(Category.getDummyReference()))
+      dataModel = (await  Store.categories.getAll())
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
       dataModel.sort((a, b) {

@@ -212,7 +212,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   Future<List<Category>> fetchCategories() async {
     _categoriesData =
-        (await Store.categories.getAll(Category.getDummyReference()))
+        (await Store.categories.getAll())
             .map((category) => Category(
                 id: category.id, name: category.name, color: category.color))
             .toList();

@@ -208,8 +208,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
       List<Category> categories =
-          (await Store.categories.getAll(Category.getDummyReference()));
-      dataModel = (await Store.notes.getAll(Note.getDummyReference()))
+          (await Store.categories.getAll());
+      dataModel = (await Store.notes.getAll())
           .map<Selectable<Note>>((Note note) {
         return Selectable(model: note, isSelected: false);
       }).toList();
@@ -307,9 +307,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
         var bodyClean = body.split('\n').first;
         if (bodyClean.contains('category:')) {
           var categoryName = bodyClean.split(':').last;
-          var categoryList = await Store.categories.getAll(
-              Category.getDummyReference(),
-              where: "name='${categoryName}'");
+          var categoryList = await Store.categories.getAll(where: "name='${categoryName}'");
           if (categoryList.isEmpty) {
             // Create category
             var randColor = Random().nextInt(Colors.primaries.length);

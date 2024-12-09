@@ -7,11 +7,12 @@ import '../providers/database_provider.dart';
 
 class ModelProvider<T extends ModelBase> {
   late DatabaseProvider databaseProvider;
+  late ModelBase modelReference;
 
-  ModelProvider({DatabaseProvider? databaseProvider}) {
+  ModelProvider({DatabaseProvider? databaseProvider, required ModelBase model}) {
     this.databaseProvider = databaseProvider ??  SqLiteDatabase();
+    this.modelReference = model;
   }
-
 
 // Define a function that inserts record into the database
   Future<int?> insert(T model) async {
@@ -36,17 +37,17 @@ class ModelProvider<T extends ModelBase> {
   }
 
 // A method that retrieves all records from the table.
-  Future<List<T>> getAll(T referenceModel,{String? where}) async {
+  Future<List<T>> getAll({String? where}) async {
     // Get a reference to the database.
     final db = await databaseProvider.database;
 
     // Query the table for all records
-    final List<Map<String, dynamic>>? maps = await db?.query(referenceModel.getTableName(),where: where);
+    final List<Map<String, dynamic>>? maps = await db?.query(this.modelReference.getTableName(),where: where);
 
     // Convert the List<Map<String, dynamic> into a List<Object>.
     if (maps != null ) {
       return List.generate(maps.length, (i) {
-        return referenceModel.create(maps[i]);
+        return this.modelReference.create(maps[i]);
       });
     } else {
       return [];
@@ -90,11 +91,11 @@ class ModelProvider<T extends ModelBase> {
 
     // Remove the Record from the database.
     await db?.delete(
-      tableName,
-      // Use a `where` clause to delete a specific record.
-      where: where,
-      // Pass the record's id as a whereArg to prevent SQL injection.
-      whereArgs: whereArgs
+        tableName,
+        // Use a `where` clause to delete a specific record.
+        where: where,
+        // Pass the record's id as a whereArg to prevent SQL injection.
+        whereArgs: whereArgs
     );
   }
 
