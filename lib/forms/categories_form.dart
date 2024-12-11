@@ -1,3 +1,4 @@
+import 'package:abc_notes/database/models/category.dart';
 import 'package:flutter/material.dart';
 
 import '../actions/app_actions.dart';
@@ -71,48 +72,11 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                            flex: 90,
-                            child: Text('${dataModel[index].model.name}')),
-                        Expanded(
-                            flex: 10,
-                            child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: new BoxDecoration(
-                                  color: Color(dataModel[index].model.color),
-                                  shape: BoxShape.circle,
-                                ))),
-                      ],
-                    ),
+                    title: categoryTitle(dataModel[index].model),
                     onTap: () {
-                      if (widget.mode == FormModes.select) {
-                        Navigator.pop(context, dataModel[index]);
-                      } else {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditCategoryForm(
-                                        category: dataModel[index].model)))
-                            .then((value) {
-                          setState(() {
-                            refreshData = true;
-                          });
-                        });
-                      }
+                      categoryOnTab(dataModel[index]);
                     },
-                    trailing: _mainForm.select == true
-                        ? Checkbox(
-                            value: dataModel[index].isSelected,
-                            onChanged: (bool? value) {
-                              dataModel[index].isSelected = value!;
-                              setState(() {});
-                            },
-                          )
-                        : null,
+                    trailing: categoryTrailing(dataModel[index]),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -127,6 +91,57 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
         addCategory();
       }),
     );
+  }
+
+
+  Widget categoryTitle(Category category){
+    return
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+              flex: 90,
+              child: Text('${category.name}')),
+          Expanded(
+              flex: 10,
+              child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: new BoxDecoration(
+                    color: Color(category.color),
+                    shape: BoxShape.circle,
+                  ))),
+        ],
+      );
+  }
+
+  Widget? categoryTrailing(Selectable<dynamic> selectable){
+    return _mainForm.select == true
+        ? Checkbox(
+            value: selectable.isSelected,
+            onChanged: (bool? value) {
+              selectable.isSelected = value!;
+              setState(() {});
+            },
+          )
+        : null;
+  }
+
+  void categoryOnTab(Selectable<dynamic> selectable){
+    if (widget.mode == FormModes.select) {
+      Navigator.pop(context, selectable);
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => EditCategoryForm(
+                  category: selectable.model)))
+          .then((value) {
+        setState(() {
+          refreshData = true;
+        });
+      });
+    }
   }
 
   Future<List<Selectable>> fetchData() async {

@@ -66,111 +66,116 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BasicField(
-                        l10n.loc!.title,
-                        'title',
-                        title,
-                        TextInputType.text,
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^.{0,50}$'))),
-                    Text(''),
-                    Text(
-                        'Last update: ${DateUtil.formatUIDateTime(updated_at)}'),
-                    FutureBuilder<List<Category>>(
-                        future: fetchCategories(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData &&
-                              snapshot.connectionState ==
-                                  ConnectionState.done) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(
-                                    flex: 50, child: Text(l10n.loc!.category)),
-                                Expanded(
-                                    flex: 50,
-                                    child: DropdownButtonFormField(
-                                        items: _categoriesData
-                                            .map((Category category) =>
-                                                DropdownMenuItem(
-                                                    alignment:
-                                                        AlignmentDirectional
-                                                            .center,
-                                                    child: Text(
-                                                      category.name,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                          fontSize: 10,
-                                                          background: Paint()
-                                                            ..color = Color(
-                                                                category.color)
-                                                            ..strokeWidth = 18
-                                                            ..strokeJoin =
-                                                                StrokeJoin.round
-                                                            ..strokeCap =
-                                                                StrokeCap.round
-                                                            ..style =
-                                                                PaintingStyle
-                                                                    .stroke,
-                                                          color: Colors.white),
-                                                    ),
-                                                    value: category.id))
-                                            .toList(),
-                                        value: idCategory,
-                                        onChanged: (dynamic value) {
-                                          setState(() {
-                                            idCategory = value;
-                                          });
-                                        }))
-                              ],
-                            );
-                          } else if (snapshot.hasError) {
-                            return Text(snapshot.error.toString());
-                          }
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 50,
-                          child: TextField(
-                            controller: body,
-                            maxLines: null,
-                            keyboardType: TextInputType.multiline,
-                            decoration: InputDecoration(
-                              hintText: l10n.loc!.body,
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(width: 1, color: Colors.grey)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                noteForm(),
             ],
           ),
         ),
       ),
       floatingActionButton:
           FloatingButton(onPressed: () => {saveNote()}, icon: Icons.save),
-      // FloatingActionButton(
-      //   onPressed: () {
-      //     saveNote();
-      //   },
-      //   backgroundColor: Colors.green,
-      //   child: Icon(Icons.save,color: Colors.white),
-      // ),
     );
+  }
+
+  Form noteForm(){
+    return Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BasicField(
+                l10n.loc!.title,
+                'title',
+                title,
+                TextInputType.text,
+                FilteringTextInputFormatter.allow(
+                    RegExp(r'^.{0,50}$'))),
+            Text(''),
+            Text('Last update: ${DateUtil.formatUIDateTime(updated_at)}'),
+            categoryBuilder(),
+            Row(
+              children: [
+                Expanded(
+                  flex: 50,
+                  child: TextField(
+                    controller: body,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: l10n.loc!.body,
+                      focusedBorder: OutlineInputBorder(
+                          borderSide:
+                          BorderSide(width: 1, color: Colors.grey)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+  }
+
+  FutureBuilder categoryBuilder(){
+    return FutureBuilder<List<Category>>(
+          future: fetchCategories(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData &&
+                snapshot.connectionState ==
+                    ConnectionState.done) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                      flex: 50, child: Text(l10n.loc!.category)),
+                  Expanded(
+                      flex: 50,
+                      child: categoriesDropDown()
+                  )
+                ],
+              );
+            } else if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            }
+            return const Center(
+                child: CircularProgressIndicator());
+          });
+  }
+
+  DropdownButtonFormField categoriesDropDown(){
+    return DropdownButtonFormField(
+        items: _categoriesData
+            .map((Category category) =>
+            DropdownMenuItem(
+                alignment:
+                AlignmentDirectional
+                    .center,
+                child: Text(
+                  category.name,
+                  textAlign:
+                  TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 10,
+                      background: Paint()
+                        ..color = Color(
+                            category.color)
+                        ..strokeWidth = 18
+                        ..strokeJoin =
+                            StrokeJoin.round
+                        ..strokeCap =
+                            StrokeCap.round
+                        ..style =
+                            PaintingStyle
+                                .stroke,
+                      color: Colors.white),
+                ),
+                value: category.id))
+            .toList(),
+        value: idCategory,
+        onChanged: (dynamic value) {
+          setState(() {
+            idCategory = value;
+          });
+        });
   }
 
   void saveNote() {

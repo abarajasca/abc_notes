@@ -65,30 +65,7 @@ class _EditCategoryFormState extends State<EditCategoryForm> with CustomForms {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BasicField(
-                          l10n.loc!.categoryName,
-                          'name',
-                          _name,
-                          TextInputType.text,
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^.{0,50}$'))),
-                      SizedBox.square(dimension: 20),
-                      Text('Color', style: TextStyle(color: Colors.black)),
-                      ColorPicker(
-                          showColorValue: true,
-                          color: Color(_color),
-                          pickersEnabled: const <ColorPickerType, bool>{
-                            ColorPickerType.accent: false
-                          },
-                          onColorChanged: onColorChanged)
-                    ],
-                  ),
-                ),
+                categoryForm(),
               ],
             ),
           ),
@@ -96,6 +73,33 @@ class _EditCategoryFormState extends State<EditCategoryForm> with CustomForms {
         floatingActionButton:
             FloatingButton(onPressed: () => {saveCategory()}, icon: Icons.save)
         );
+  }
+
+  Form categoryForm(){
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BasicField(
+              l10n.loc!.categoryName,
+              'name',
+              _name,
+              TextInputType.text,
+              FilteringTextInputFormatter.allow(
+                  RegExp(r'^.{0,50}$'))),
+          SizedBox.square(dimension: 20),
+          Text('Color', style: TextStyle(color: Colors.black)),
+          ColorPicker(
+              showColorValue: true,
+              color: Color(_color),
+              pickersEnabled: const <ColorPickerType, bool>{
+                ColorPickerType.accent: false
+              },
+              onColorChanged: onColorChanged)
+        ],
+      ),
+    );
   }
 
   void saveCategory() {

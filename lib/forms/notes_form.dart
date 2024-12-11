@@ -16,6 +16,9 @@ import '../util/selectable.dart';
 import '../l10n/l10n.dart';
 import '../util/DateUtil.dart';
 import '../widgets/floating_button.dart';
+import '../export/export_as_text.dart';
+import '../export/export_note.dart';
+
 
 import 'form_modes.dart';
 import 'main_form.dart';
@@ -57,6 +60,7 @@ class NotesForm extends StatefulWidget implements FormActions {
     return formActions;
   }
 
+
   @override
   void onAction(AppActions action) {
     _formActions[action]!();
@@ -73,6 +77,14 @@ class _NotesFormState extends State<NotesForm> with Settings {
   bool refreshData = true;
   late MainFormState _mainForm;
   bool showLastUpdate = false;
+  late Map<AppActions,int Function(Selectable<dynamic>, Selectable<dynamic>)>  _sortComparators;
+  late Map<AppActions,bool Function()> _sortTypes;
+
+
+  _NotesFormState(){
+    _sortComparators =  _mapSortComparators();
+    _sortTypes = _mapSortTypes();
+  }
 
   @override
   initState() {
@@ -99,69 +111,12 @@ class _NotesFormState extends State<NotesForm> with Settings {
                 padding: const EdgeInsets.all(8),
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
-                  Category category = dataModel[index].model.category;
                   return ListTile(
-                    title: Column(children: [
-                      Row(
-                        children: [
-                          Expanded(
-                              flex: 75,
-                              child: Text('${dataModel[index].model.title}')),
-                          Expanded(
-                            flex: 25,
-                            child: Text(
-                              category.name,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  background: Paint()
-                                    ..color = Color(category.color)
-                                    ..strokeWidth = 18
-                                    ..strokeJoin = StrokeJoin.round
-                                    ..strokeCap = StrokeCap.round
-                                    ..style = PaintingStyle.stroke,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(children: [
-                        if (showLastUpdate)
-                          Text(
-                              '${DateUtil.formatUIDateTime(dataModel[index].model.updated_at)}',
-                              style: TextStyle(fontSize: 10))
-                      ])
-                    ]),
+                    title: noteTitle(dataModel[index].model),
                     onTap: () {
-                      if (widget.mode == FormModes.select) {
-                        Navigator.pop(context, dataModel[index]);
-                      } else {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EditNoteForm(
-                                        note: dataModel[index].model)))
-                            .then((value) {
-                          setState(() {
-                            refreshData = true;
-                          });
-                        });
-                      }
+                      noteOnTap(dataModel[index]);
                     },
-                    trailing: _mainForm.select == true
-                        ? StatefulBuilder(builder: (BuildContext context,
-                            StateSetter setStateInternal) {
-                            return Checkbox(
-                              value: dataModel[index].isSelected,
-                              onChanged: (bool? value) {
-                                setStateInternal(() {
-                                  dataModel[index].isSelected = value!;
-                                  refreshData = false;
-                                });
-                              },
-                            );
-                          })
-                        : null,
+                    trailing: noteTrailing(dataModel[index]),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -176,6 +131,75 @@ class _NotesFormState extends State<NotesForm> with Settings {
         addNote();
       }),
     );
+  }
+
+  Widget noteTitle(Note note){
+    return
+      Column(children: [
+        Row(
+          children: [
+            Expanded(
+                flex: 75,
+                child: Text('${note.title}')),
+            Expanded(
+              flex: 25,
+              child: Text(
+                note.category.name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 10,
+                    background: Paint()
+                      ..color = Color(note.category.color)
+                      ..strokeWidth = 18
+                      ..strokeJoin = StrokeJoin.round
+                      ..strokeCap = StrokeCap.round
+                      ..style = PaintingStyle.stroke,
+                    color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        Row(children: [
+          if (showLastUpdate)
+            Text(
+                '${DateUtil.formatUIDateTime(note.updated_at)}',
+                style: TextStyle(fontSize: 10))
+        ])
+      ]);
+  }
+
+  StatefulBuilder? noteTrailing(Selectable<dynamic> model){
+    return _mainForm.select == true
+        ? StatefulBuilder(builder: (BuildContext context,
+            StateSetter setStateInternal) {
+            return Checkbox(
+              value: model.isSelected,
+              onChanged: (bool? value) {
+                setStateInternal(() {
+                  model.isSelected = value!;
+                  refreshData = false;
+                });
+              },
+            );
+          })
+        : null;
+  }
+
+  void noteOnTap(Selectable<dynamic> model) {
+    if (widget.mode == FormModes.select) {
+      Navigator.pop(context, model);
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => EditNoteForm(
+                  note: model.model)))
+          .then((value) {
+        setState(() {
+          refreshData = true;
+        });
+      });
+    }
   }
 
   Future<List<Selectable>> fetchData() async {
@@ -247,21 +271,25 @@ class _NotesFormState extends State<NotesForm> with Settings {
     if (dataModel.any((element) => element.isSelected)) {
       String? selectedDirectory = await FilePicker.platform
           .getDirectoryPath(dialogTitle: l10n.loc!.selectFolder);
-      if (await Permission.manageExternalStorage.request().isGranted) {
-        dataModel
-            .where((element) => element.isSelected)
-            .forEach((element) async {
-          String nameFilePath = '$selectedDirectory/${element.model.title}.txt';
-          String bodyContent =
-              'category:${element.model.category.name}\n\n${element.model.body}';
-          await File(nameFilePath).writeAsString(bodyContent);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.loc!.notesExporterIn(selectedDirectory!))));
-      }
+      await _saveNotesAsFiles(selectedDirectory);
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.loc!.selectNotesToExport)));
+    }
+  }
+
+  Future<void> _saveNotesAsFiles(String? selectedDirectory) async {
+    ExportAsText exportAsText = new ExportAsText();
+    ExportNote exportNote = ExportNote(selectedDirectory!,exportAsText);
+
+    if (await Permission.manageExternalStorage.request().isGranted) {
+      dataModel
+          .where((element) => element.isSelected)
+          .forEach((element) async {
+            exportNote.export(element.model);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.loc!.notesExporterIn(selectedDirectory!))));
     }
   }
 
@@ -337,41 +365,34 @@ class _NotesFormState extends State<NotesForm> with Settings {
     });
   }
 
+  Map<AppActions,bool Function()> _mapSortTypes() {
+    return {
+      AppActions.sort_time: () => _mainForm.sort_time ,
+      AppActions.sort_title: () => _mainForm.sort_title ,
+      AppActions.sort_category: () => _mainForm.sort_category ,
+    };
+  }
+
+  Map<AppActions, int Function(Selectable<dynamic>,Selectable<dynamic>) > _mapSortComparators(){
+    return {
+      AppActions.sort_time: (x,y) => x.model.updated_at.compareTo(y.model.updated_at),
+      AppActions.sort_title: (x,y) => x.model.title.compareTo(y.model.title) ,
+      AppActions.sort_category: (x,y) => x.model.category.name.compareTo(y.model.category.name),
+    };
+  }
+
   void sort_data() {
-    bool sort_order = false;
-    switch (_mainForm.sort_type) {
-      case AppActions.sort_time:
-        sort_order = _mainForm.sort_time;
-        break;
-      case AppActions.sort_title:
-        sort_order = _mainForm.sort_title;
-        break;
-      case AppActions.sort_category:
-        sort_order = _mainForm.sort_category;
-        break;
-    }
+    bool sort_order = _sortTypes[_mainForm.sort_type]!();
 
     dataModel.sort((a, b) {
       var x = a;
       var y = b;
-      int sort_result = 0;
       if (sort_order == false) {
         // true: ascending , false: descending  Change this please !! for 'asc' 'desc'
         x = b;
         y = a;
       }
-      switch (_mainForm.sort_type) {
-        case AppActions.sort_time:
-          sort_result = x.model.updated_at.compareTo(y.model.updated_at);
-          break;
-        case AppActions.sort_title:
-          sort_result = x.model.title.compareTo(y.model.title);
-          break;
-        case AppActions.sort_category:
-          sort_result = x.model.category.name.compareTo(y.model.category.name);
-          break;
-      }
-      return sort_result;
+      return _sortComparators[_mainForm.sort_type]!(x,y);
     });
   }
 
