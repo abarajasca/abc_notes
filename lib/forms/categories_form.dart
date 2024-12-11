@@ -1,21 +1,21 @@
-import 'package:abc_notes/database/providers/model_provider.dart';
 import 'package:flutter/material.dart';
 
-import 'package:abc_notes/actions/app_actions.dart';
-import 'package:abc_notes/database/models/category.dart';
-import 'package:abc_notes/forms/edit_category_form.dart';
-
+import '../actions/app_actions.dart';
 import '../database/store/store.dart';
 import '../mixins/settings.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
+import '../widgets/floating_button.dart';
+
 import 'form_modes.dart';
 import 'main_form.dart';
+import 'edit_category_form.dart';
 
 class CategoriesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _CategoriesFormState _categoriesFormState;
   late MainFormState _mainForm;
+  late Map<AppActions, void Function()> _formActions;
 
   CategoriesForm({Key? key, required this.mode}) : super(key: key);
 
@@ -23,33 +23,24 @@ class CategoriesForm extends StatefulWidget implements FormActions {
   State<CategoriesForm> createState() {
     _categoriesFormState = _CategoriesFormState();
     _categoriesFormState.registerParent(_mainForm);
+    _formActions = _mapFormActions();
     return _categoriesFormState;
+  }
+
+  Map<AppActions, void Function()> _mapFormActions() {
+    Map<AppActions, void Function()> formActions = {
+      AppActions.add: _categoriesFormState.addCategory,
+      AppActions.delete: _categoriesFormState.delete,
+      AppActions.settings: _categoriesFormState.openSettings,
+      AppActions.select: _categoriesFormState.updateSelect,
+    };
+
+    return formActions;
   }
 
   @override
   void onAction(AppActions action) {
-    switch (action) {
-      case AppActions.add:
-        {
-          _categoriesFormState.addCategory();
-        }
-        break;
-      case AppActions.delete:
-        {
-          _categoriesFormState.delete();
-        }
-        break;
-      case AppActions.settings:
-        {
-          _categoriesFormState.openSettings();
-        }
-        break;
-      case AppActions.select:
-        {
-          _categoriesFormState.updateSelect();
-        }
-        break;
-    }
+    _formActions[action]!();
   }
 
   @override
@@ -80,46 +71,48 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
                 itemCount: dataModel.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                              flex: 90,
-                              child: Text('${dataModel[index].model.name}')),
-                          Expanded(
-                              flex: 10,
-                              child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: new BoxDecoration(
-                                    color: Color(dataModel[index].model.color),
-                                    shape: BoxShape.circle,
-                                  ))),
-                        ],
-                      ),
-                      onTap: () {
-                        if (widget.mode == FormModes.select) {
-                          Navigator.pop(context, dataModel[index]);
-                        } else {
-                          Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EditCategoryForm(
-                                          category: dataModel[index].model)))
-                              .then((value) {
-                            setState(() {
-                              refreshData = true;
-                            });
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                            flex: 90,
+                            child: Text('${dataModel[index].model.name}')),
+                        Expanded(
+                            flex: 10,
+                            child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: new BoxDecoration(
+                                  color: Color(dataModel[index].model.color),
+                                  shape: BoxShape.circle,
+                                ))),
+                      ],
+                    ),
+                    onTap: () {
+                      if (widget.mode == FormModes.select) {
+                        Navigator.pop(context, dataModel[index]);
+                      } else {
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditCategoryForm(
+                                        category: dataModel[index].model)))
+                            .then((value) {
+                          setState(() {
+                            refreshData = true;
                           });
-                        }
-                      },
-                      trailing: _mainForm.select == true ?  Checkbox(
-                          value: dataModel[index].isSelected,
-                          onChanged: (bool? value) {
-                            dataModel[index].isSelected = value!;
-                            setState(() {});
-                          },
-                      ) : null,
+                        });
+                      }
+                    },
+                    trailing: _mainForm.select == true
+                        ? Checkbox(
+                            value: dataModel[index].isSelected,
+                            onChanged: (bool? value) {
+                              dataModel[index].isSelected = value!;
+                              setState(() {});
+                            },
+                          )
+                        : null,
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
@@ -130,14 +123,9 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          addCategory();
-        },
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingButton(onPressed: () {
+        addCategory();
+      }),
     );
   }
 
@@ -148,7 +136,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
           .map((item) {
         return item['idCategory'] as int;
       }).toList();
-      dataModel = (await  Store.categories.getAll())
+      dataModel = (await Store.categories.getAll())
           .map((category) => Selectable(model: category, isSelected: false))
           .toList();
       dataModel.sort((a, b) {
@@ -185,12 +173,11 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
           if (item.model.id != 1) {
             deleted = true;
             Store.categories.delete(item.model);
-          } else
-            {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(l10n.loc!.categoryCantBeDeleted),
-              ));
-            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(l10n.loc!.categoryCantBeDeleted),
+            ));
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(l10n.loc!.categoryUsedInNotes(item.model.name)),
@@ -223,6 +210,6 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   void updateSelect() {
     setState(() {
       _mainForm.changeVisibility();
-        });
+    });
   }
 }

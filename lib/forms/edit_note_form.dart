@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:abc_notes/database/store/store.dart';
-
 import '../database/models/category.dart';
 import '../database/models/note.dart';
+import '../database/store/store.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../l10n/l10n.dart';
 import '../util/DateUtil.dart';
+import '../widgets/floating_button.dart';
 
 class EditNoteForm extends StatefulWidget {
   Note? note;
@@ -25,12 +25,11 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   final title = TextEditingController();
   final body = TextEditingController();
-  String created_at ='';
-  String updated_at ='';
+  String created_at = '';
+  String updated_at = '';
   int idCategory = 0;
 
   Note? note;
-
 
   _EditNoteFormState({this.note}) {
     loadFields();
@@ -58,7 +57,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
         backgroundColor: Colors.green,
         title: Text(
           _editMode() ? l10n.loc!.editNote : l10n.loc!.addNote,
-          style: TextStyle(fontSize: 18,color: Colors.white),
+          style: TextStyle(fontSize: 18, color: Colors.white),
         ),
         centerTitle: false,
       ),
@@ -79,8 +78,9 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                         TextInputType.text,
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^.{0,50}$'))),
-                    Text('' ),
-                    Text('Last update: ${DateUtil.formatUIDateTime(updated_at)}'),
+                    Text(''),
+                    Text(
+                        'Last update: ${DateUtil.formatUIDateTime(updated_at)}'),
                     FutureBuilder<List<Category>>(
                         future: fetchCategories(),
                         builder: (context, snapshot) {
@@ -161,13 +161,15 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          saveNote();
-        },
-        backgroundColor: Colors.green,
-        child: Icon(Icons.save,color: Colors.white),
-      ),
+      floatingActionButton:
+          FloatingButton(onPressed: () => {saveNote()}, icon: Icons.save),
+      // FloatingActionButton(
+      //   onPressed: () {
+      //     saveNote();
+      //   },
+      //   backgroundColor: Colors.green,
+      //   child: Icon(Icons.save,color: Colors.white),
+      // ),
     );
   }
 
@@ -186,7 +188,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
     int? newId = 0;
     String message = '';
 
-    if (_editMode()){
+    if (_editMode()) {
       updated_at = DateUtil.getCurrentDateTime();
     } else {
       created_at = DateUtil.getCurrentDateTime();
@@ -211,11 +213,10 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   }
 
   Future<List<Category>> fetchCategories() async {
-    _categoriesData =
-        (await Store.categories.getAll())
-            .map((category) => Category(
-                id: category.id, name: category.name, color: category.color))
-            .toList();
+    _categoriesData = (await Store.categories.getAll())
+        .map((category) => Category(
+            id: category.id, name: category.name, color: category.color))
+        .toList();
     _categoriesData.sort((a, b) {
       return a.name.compareTo(b.name);
     });

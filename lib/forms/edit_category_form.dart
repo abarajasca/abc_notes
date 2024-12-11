@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
@@ -8,6 +9,7 @@ import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
+import '../widgets/floating_button.dart';
 
 class EditCategoryForm extends StatefulWidget {
   Category? category;
@@ -19,8 +21,7 @@ class EditCategoryForm extends StatefulWidget {
       _EditCategoryFormState(category: category);
 }
 
-class _EditCategoryFormState extends State<EditCategoryForm>
-    with CustomForms {
+class _EditCategoryFormState extends State<EditCategoryForm> with CustomForms {
   final _formKey = GlobalKey<FormState>();
 
   final _name = TextEditingController();
@@ -51,57 +52,53 @@ class _EditCategoryFormState extends State<EditCategoryForm>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: Text(
-          _editMode() ? l10n.loc!.editCategory : l10n.loc!.addCategory,
-          style: TextStyle(fontSize: 18,color: Colors.white),
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          title: Text(
+            _editMode() ? l10n.loc!.editCategory : l10n.loc!.addCategory,
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
+          centerTitle: false,
         ),
-        centerTitle: false,
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(15),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BasicField(
-                        l10n.loc!.categoryName,
-                        'name',
-                        _name,
-                        TextInputType.text,
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^.{0,50}$'))),
-                   SizedBox.square(dimension: 20),
-                    Text('Color',style: TextStyle(color: Colors.black)),
-                    ColorPicker(
-                        showColorValue: true,
-                        color: Color(_color),
-                        pickersEnabled: const <ColorPickerType,bool>{ColorPickerType.accent: false},
-                        onColorChanged: onColorChanged)
-                  ],
+        body: Padding(
+          padding: EdgeInsets.all(15),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BasicField(
+                          l10n.loc!.categoryName,
+                          'name',
+                          _name,
+                          TextInputType.text,
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^.{0,50}$'))),
+                      SizedBox.square(dimension: 20),
+                      Text('Color', style: TextStyle(color: Colors.black)),
+                      ColorPicker(
+                          showColorValue: true,
+                          color: Color(_color),
+                          pickersEnabled: const <ColorPickerType, bool>{
+                            ColorPickerType.accent: false
+                          },
+                          onColorChanged: onColorChanged)
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton:
-      FloatingActionButton(
-        onPressed: () {
-          saveCategory();
-        },
-        backgroundColor: Colors.green,
-        child: Icon(Icons.save,color: Colors.white),
-      ),
-    );
+        floatingActionButton:
+            FloatingButton(onPressed: () => {saveCategory()}, icon: Icons.save)
+        );
   }
 
-  void saveCategory(){
+  void saveCategory() {
     if (_formKey.currentState!.validate()) {
       save(
         context,
@@ -111,19 +108,12 @@ class _EditCategoryFormState extends State<EditCategoryForm>
     }
   }
 
-  Future<void> save(
-      BuildContext context,
-      String name,
-      int color
-      ) async {
+  Future<void> save(BuildContext context, String name, int color) async {
     int? newId = 0;
     String message = '';
 
     newId = await Store.categories.insert(Category(
-        id: _editMode() ? category!.id : null,
-        name: name,
-        color: color
-        ));
+        id: _editMode() ? category!.id : null, name: name, color: color));
     if (newId != 0) {
       message = l10n.loc!.categorySaved(name);
       Navigator.pop(context);
@@ -139,8 +129,7 @@ class _EditCategoryFormState extends State<EditCategoryForm>
     return category != null;
   }
 
-  void onColorChanged(Color colorRef){
+  void onColorChanged(Color colorRef) {
     _color = colorRef.value;
   }
-
 }

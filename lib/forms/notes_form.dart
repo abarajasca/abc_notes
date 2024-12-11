@@ -1,29 +1,32 @@
 import 'dart:io';
 import 'dart:math';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:abc_notes/database/models/category.dart';
-import 'package:abc_notes/database/models/note.dart';
-import 'package:abc_notes/forms/edit_note_form.dart';
-import 'package:abc_notes/forms/search_form.dart';
-import 'package:abc_notes/util/general_preferences.dart';
-import 'package:abc_notes/actions/app_actions.dart';
-
+import '../database/models/category.dart';
+import '../database/models/note.dart';
+import '../util/general_preferences.dart';
+import '../actions/app_actions.dart';
 import '../database/store/store.dart';
 import '../mixins/settings.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
+import '../util/DateUtil.dart';
+import '../widgets/floating_button.dart';
+
 import 'form_modes.dart';
 import 'main_form.dart';
-import '../util/DateUtil.dart';
+import 'edit_note_form.dart';
+import 'search_form.dart';
 
 class NotesForm extends StatefulWidget implements FormActions {
   late FormModes mode;
   late _NotesFormState _notesFormState;
   late MainFormState _mainForm;
+  late Map<AppActions, void Function()> _formActions;
 
   NotesForm({Key? key, required this.mode}) : super(key: key);
 
@@ -31,57 +34,32 @@ class NotesForm extends StatefulWidget implements FormActions {
   State<NotesForm> createState() {
     _notesFormState = _NotesFormState();
     _notesFormState.registerParent(_mainForm);
+    _formActions = _mapFormActions();
     return _notesFormState;
+  }
+
+  Map<AppActions, void Function()> _mapFormActions() {
+    Map<AppActions, void Function()> formActions = {
+      AppActions.add: _notesFormState.addNote,
+      AppActions.delete: _notesFormState.delete,
+      AppActions.export: _notesFormState.exportNotes,
+      AppActions.import: _notesFormState.importNotes,
+      AppActions.settings: _notesFormState.openSettings,
+      AppActions.select: _notesFormState.updateSelect,
+      AppActions.search: _notesFormState.search,
+      AppActions.sort_title: _notesFormState.sort_title,
+      AppActions.sort_category: _notesFormState.sort_category,
+      AppActions.sort_time: _notesFormState.sort_time,
+      AppActions.select_all: _notesFormState.select_all,
+      AppActions.unselect_all: _notesFormState.unselect_all,
+    };
+
+    return formActions;
   }
 
   @override
   void onAction(AppActions action) {
-    switch (action) {
-      case AppActions.add:
-        {
-          _notesFormState.addNote();
-        }
-        break;
-      case AppActions.delete:
-        {
-          _notesFormState.delete();
-        }
-        break;
-      case AppActions.export:
-        _notesFormState.exportNotes();
-        break;
-      case AppActions.import:
-        _notesFormState.importNotes();
-        break;
-      case AppActions.settings:
-        {
-          _notesFormState.openSettings();
-        }
-        break;
-      case AppActions.select:
-        {
-          _notesFormState.updateSelect();
-        }
-        break;
-      case AppActions.search:
-        _notesFormState.search();
-        break;
-      case AppActions.sort_title:
-        _notesFormState.sort_title();
-        break;
-      case AppActions.sort_category:
-        _notesFormState.sort_category();
-        break;
-      case AppActions.sort_time:
-        _notesFormState.sort_time();
-        break;
-      case AppActions.select_all:
-        _notesFormState.select_all();
-        break;
-      case AppActions.unselect_all:
-        _notesFormState.unselect_all();
-        break;
-    }
+    _formActions[action]!();
   }
 
   @override
@@ -149,7 +127,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
                       ),
                       Row(children: [
                         if (showLastUpdate)
-                          Text('${DateUtil.formatUIDateTime(dataModel[index].model.updated_at)}',
+                          Text(
+                              '${DateUtil.formatUIDateTime(dataModel[index].model.updated_at)}',
                               style: TextStyle(fontSize: 10))
                       ])
                     ]),
@@ -170,19 +149,18 @@ class _NotesFormState extends State<NotesForm> with Settings {
                       }
                     },
                     trailing: _mainForm.select == true
-                        ? StatefulBuilder(
-                      builder: (BuildContext context,StateSetter setStateInternal) {
-                        return Checkbox(
-                          value: dataModel[index].isSelected,
-                          onChanged: (bool? value) {
-                            setStateInternal(() {
-                              dataModel[index].isSelected = value!;
-                              refreshData = false;
-                            });
-                          },
-                        );
-                      }
-                    )
+                        ? StatefulBuilder(builder: (BuildContext context,
+                            StateSetter setStateInternal) {
+                            return Checkbox(
+                              value: dataModel[index].isSelected,
+                              onChanged: (bool? value) {
+                                setStateInternal(() {
+                                  dataModel[index].isSelected = value!;
+                                  refreshData = false;
+                                });
+                              },
+                            );
+                          })
                         : null,
                   );
                 },
@@ -194,23 +172,17 @@ class _NotesFormState extends State<NotesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          addNote();
-        },
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingButton(onPressed: () {
+        addNote();
+      }),
     );
   }
 
   Future<List<Selectable>> fetchData() async {
     if (refreshData) {
-      List<Category> categories =
-          (await Store.categories.getAll());
-      dataModel = (await Store.notes.getAll())
-          .map<Selectable<Note>>((Note note) {
+      List<Category> categories = (await Store.categories.getAll());
+      dataModel =
+          (await Store.notes.getAll()).map<Selectable<Note>>((Note note) {
         return Selectable(model: note, isSelected: false);
       }).toList();
       dataModel.forEach((item) {
@@ -279,8 +251,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
         dataModel
             .where((element) => element.isSelected)
             .forEach((element) async {
-          String nameFilePath =
-              '$selectedDirectory/${element.model.title}.txt';
+          String nameFilePath = '$selectedDirectory/${element.model.title}.txt';
           String bodyContent =
               'category:${element.model.category.name}\n\n${element.model.body}';
           await File(nameFilePath).writeAsString(bodyContent);
@@ -288,7 +259,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(l10n.loc!.notesExporterIn(selectedDirectory!))));
       }
-        } else {
+    } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.loc!.selectNotesToExport)));
     }
@@ -307,7 +278,8 @@ class _NotesFormState extends State<NotesForm> with Settings {
         var bodyClean = body.split('\n').first;
         if (bodyClean.contains('category:')) {
           var categoryName = bodyClean.split(':').last;
-          var categoryList = await Store.categories.getAll(where: "name='${categoryName}'");
+          var categoryList =
+              await Store.categories.getAll(where: "name='${categoryName}'");
           if (categoryList.isEmpty) {
             // Create category
             var randColor = Random().nextInt(Colors.primaries.length);
@@ -338,7 +310,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
   void updateSelect() {
     setState(() {
       _mainForm.changeVisibility();
-        });
+    });
   }
 
   void registerParent(MainFormState mainForm) {
@@ -379,13 +351,12 @@ class _NotesFormState extends State<NotesForm> with Settings {
         break;
     }
 
-    print("Shorting.. ${ _mainForm.sort_type } ${sort_order}");
-
     dataModel.sort((a, b) {
       var x = a;
       var y = b;
       int sort_result = 0;
-      if (sort_order == false) {   // true: ascending , false: descending  Change this please !! for 'asc' 'desc'
+      if (sort_order == false) {
+        // true: ascending , false: descending  Change this please !! for 'asc' 'desc'
         x = b;
         y = a;
       }
