@@ -14,7 +14,7 @@ import '../mixins/settings.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
 import '../l10n/l10n.dart';
-import '../util/DateUtil.dart';
+import '../util/date_util.dart';
 import '../widgets/floating_button.dart';
 import '../export/export_as_text.dart';
 import '../export/export_note.dart';
@@ -127,7 +127,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
-      floatingActionButton: FloatingButton(onPressed: () {
+      floatingActionButton: FloatingButton(key: ValueKey('add_note'), onPressed: () {
         addNote();
       }),
     );
@@ -173,6 +173,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
         ? StatefulBuilder(builder: (BuildContext context,
             StateSetter setStateInternal) {
             return Checkbox(
+              key: ValueKey('chk-note'),
               value: model.isSelected,
               onChanged: (bool? value) {
                 setStateInternal(() {

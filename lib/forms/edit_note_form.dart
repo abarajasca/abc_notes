@@ -7,7 +7,7 @@ import '../database/store/store.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../l10n/l10n.dart';
-import '../util/DateUtil.dart';
+import '../util/date_util.dart';
 import '../widgets/floating_button.dart';
 
 class EditNoteForm extends StatefulWidget {
@@ -52,6 +52,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -72,7 +73,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
         ),
       ),
       floatingActionButton:
-          FloatingButton(onPressed: () => {saveNote()}, icon: Icons.save),
+          FloatingButton(key: ValueKey('save_note'), onPressed: () => {saveNote()}, icon: Icons.save),
     );
   }
 
@@ -97,6 +98,7 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
                 Expanded(
                   flex: 50,
                   child: TextField(
+                    key: ValueKey('body'),
                     controller: body,
                     maxLines: null,
                     keyboardType: TextInputType.multiline,

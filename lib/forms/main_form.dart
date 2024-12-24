@@ -114,10 +114,12 @@ class MainFormState extends State<MainForm> {
         bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
+              key: ValueKey('bnbi-notes'),
               icon: Icon(Icons.notes),
               label: AppLocalizations.of(context)!.notes,
             ),
             BottomNavigationBarItem(
+              key: ValueKey('bnbi-categories'),
               icon: Icon(Icons.category),
               label: AppLocalizations.of(context)!.categories,
             ),
@@ -150,11 +152,13 @@ class MainFormState extends State<MainForm> {
       actionList[index].add(Visibility(
           visible: select,
           child: IconButton(
+              key: ValueKey('icon-delete'),
               icon: const Icon(Icons.delete, color: Colors.white),
               onPressed: () {
                 _callOnAction(index, AppActions.delete);
               })));
       actionList[index].add(IconButton(
+          key: ValueKey('icon-select'),
           icon: const Icon(Icons.select_all, color: Colors.white),
           onPressed: () {
             _callOnAction(index, AppActions.select);

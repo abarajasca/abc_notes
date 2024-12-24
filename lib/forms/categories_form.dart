@@ -118,6 +118,7 @@ class _CategoriesFormState extends State<CategoriesForm> with Settings {
   Widget? categoryTrailing(Selectable<dynamic> selectable){
     return _mainForm.select == true
         ? Checkbox(
+            key: ValueKey('chk-category'),
             value: selectable.isSelected,
             onChanged: (bool? value) {
               selectable.isSelected = value!;

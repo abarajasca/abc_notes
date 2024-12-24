@@ -1,10 +1,10 @@
 
+import 'package:abc_notes/database/store/store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 
 import '../database/models/category.dart';
-import '../database/store/store.dart';
 import '../mixins/custom_forms.dart';
 import '../util/preferences.dart';
 import '../util/selectable.dart';
