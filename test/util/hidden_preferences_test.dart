@@ -1,4 +1,3 @@
-import 'package:abc_notes/util/general_preferences.dart';
 import 'package:abc_notes/util/hidden_preferences.dart';
 import 'package:test/test.dart';
 

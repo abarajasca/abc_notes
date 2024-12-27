@@ -1,3 +1,4 @@
+import 'package:abc_notes/actions/popup_menu.dart';
 import 'package:abc_notes/util/hidden_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -142,37 +143,36 @@ class MainFormState extends State<MainForm> {
   List<List<Widget>> _buildActions() {
     final List<List<Widget>> actionList = [[], []];
 
+    // Notes Icon Buttons
     actionList[0].add(IconButton(
         icon: const Icon(Icons.search, color: Colors.white),
         onPressed: () {
           _callOnAction(0, AppActions.search);
         }));
 
-    for (var index in [0, 1]) {
-      actionList[index].add(Visibility(
-          visible: select,
-          child: IconButton(
-              key: ValueKey('icon-delete'),
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: () {
-                _callOnAction(index, AppActions.delete);
-              })));
-      actionList[index].add(IconButton(
-          key: ValueKey('icon-select'),
-          icon: const Icon(Icons.select_all, color: Colors.white),
-          onPressed: () {
-            _callOnAction(index, AppActions.select);
-          }));
-    }
+    actionList[0].add(Visibility(
+        visible: select,
+        child: IconButton(
+            key: ValueKey('icon-delete'),
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: () {
+              _callOnAction(0, AppActions.delete);
+            })));
+    actionList[0].add(IconButton(
+        key: ValueKey('icon-select'),
+        icon: const Icon(Icons.select_all, color: Colors.white),
+        onPressed: () {
+          _callOnAction(0, AppActions.select);
+        }));
 
-    // Add sort menu for notes.
+    // Notes sort options popup menu
     actionList[0].add(
       PopupMenuButton<int>(
         icon: Icon(Icons.sort, color: Colors.white),
-        onSelected: (index) => _callOnAdditionalMenu(0, index),
+        onSelected: (index) => _callOnAdditionalMenu(PopupMenu.note_sort.index, index),
         itemBuilder: (context) => [
           PopupMenuItem<int>(
-            value: 0,
+            value: NoteSortMenuItem.sort_by_time.index ,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,7 +183,7 @@ class MainFormState extends State<MainForm> {
             ),
           ),
           PopupMenuItem<int>(
-            value: 1,
+            value: NoteSortMenuItem.sort_by_title.index,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -194,7 +194,7 @@ class MainFormState extends State<MainForm> {
             ),
           ),
           PopupMenuItem<int>(
-            value: 2,
+            value: NoteSortMenuItem.sort_by_category.index,
             child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,41 +206,59 @@ class MainFormState extends State<MainForm> {
         ],
       ),
     );
-    // add additional menu for notes.
+
+    // add additional popup menu for notes.
 
     actionList[0].add(
       PopupMenuButton<int>(
         icon: Icon(Icons.more_vert, color: Colors.white),
-        onSelected: (index) => _callOnAdditionalMenu(1, index),
+        onSelected: (index) => _callOnAdditionalMenu(PopupMenu.note_options.index , index),
         itemBuilder: (context){
           List<PopupMenuEntry<int>> menuItemsAdditional = [];
           if (select ) {
             menuItemsAdditional = [
-              PopupMenuItem<int>(value: 0, child: Text(l10n.loc!.export)),
-              PopupMenuItem<int>(value: 1, child: Text(l10n.loc!.import)),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.export.index, child: Text(l10n.loc!.export)),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.import.index, child: Text(l10n.loc!.import)),
               PopupMenuDivider(),
-              PopupMenuItem<int>(value: 2, child: Text('Select all')),
-              PopupMenuItem<int>(value: 3, child: Text('Unselect all')),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.select_all.index, child: Text('Select all')),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.unselect_all.index, child: Text('Unselect all')),
               PopupMenuDivider(),
-              PopupMenuItem<int>(value: 4, child: Text(l10n.loc!.settings)),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.settings.index, child: Text(l10n.loc!.settings)),
             ];
           } else {
             menuItemsAdditional = [
-              PopupMenuItem<int>(value: 1, child: Text(l10n.loc!.import)),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.import.index, child: Text(l10n.loc!.import)),
               PopupMenuDivider(),
-              PopupMenuItem<int>(value: 4, child: Text(l10n.loc!.settings))
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.settings.index, child: Text(l10n.loc!.settings))
             ];
           }
           return menuItemsAdditional;
         },
       ),
     );
-    // Add additional menu for Categoriew.
+
+    // Categories Icon buttons
+    actionList[1].add(Visibility(
+        visible: select,
+        child: IconButton(
+            key: ValueKey('icon-delete'),
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: () {
+              _callOnAction(1, AppActions.delete);
+            })));
+    actionList[1].add(IconButton(
+        key: ValueKey('icon-select'),
+        icon: const Icon(Icons.select_all, color: Colors.white),
+        onPressed: () {
+          _callOnAction(1, AppActions.select);
+        }));
+
+    // Popup menu for Categories.
     actionList[1].add(
       PopupMenuButton<int>(
-        onSelected: (index) => _callOnAdditionalMenu(1, index),
+        onSelected: (index) => _callOnAdditionalMenu(PopupMenu.category_settings.index, index),
         itemBuilder: (context) => [
-          PopupMenuItem<int>(value: 2, child: Text(l10n.loc!.settings)),
+          PopupMenuItem<int>(value: CategorySettingsMenuItem.settings.index, child: Text(l10n.loc!.settings)),
         ],
       ),
     );
@@ -253,9 +271,9 @@ class MainFormState extends State<MainForm> {
 
   void _callOnAdditionalMenu(int popupId, int index) {
     switch (popupId) {
-      case 0:
+      case 0 :  // Note sort menu
         switch (index) {
-          case 0:
+          case 0 :
             (_forms[0] as FormActions).onAction(AppActions.sort_time);
             break;
           case 1:
@@ -266,7 +284,7 @@ class MainFormState extends State<MainForm> {
             break;
         }
         break;
-      case 1:
+      case 1:  // Notes options menu
         switch (index) {
           case 0:
             (_forms[0] as FormActions).onAction(AppActions.export);
@@ -282,6 +300,13 @@ class MainFormState extends State<MainForm> {
             break;
           case 4:
             (_forms[0] as FormActions).onAction(AppActions.settings);
+            break;
+        }
+        break;
+      case 2:  // Settings category menu
+        switch (index) {
+          case 0:
+            (_forms[1] as FormActions).onAction(AppActions.settings);
             break;
         }
         break;

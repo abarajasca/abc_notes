@@ -3,7 +3,6 @@ import 'package:abc_notes/database/store/store.dart';
 import 'package:abc_notes/main.dart';
 import 'package:abc_notes/widgets/floating_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

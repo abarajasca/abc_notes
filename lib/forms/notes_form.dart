@@ -290,7 +290,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
             exportNote.export(element.model);
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.loc!.notesExporterIn(selectedDirectory!))));
+          content: Text(l10n.loc!.notesExporterIn(selectedDirectory))));
     }
   }
 
