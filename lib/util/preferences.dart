@@ -8,7 +8,8 @@ class Preferences {
     final pref = await SharedPreferences.getInstance();
     return GeneralPreferences(
         backgroundColor: pref.getString('gen.background_color') ?? 'blue',
-        showLastUpdate: pref.getBool('gen.showLastUpdate') ?? true
+        showLastUpdate: pref.getBool('gen.showLastUpdate') ?? true,
+        closeNoteAfterSave: pref.getBool('gen.closeNoteAfterSave') ?? true
     );
   }
 
@@ -16,6 +17,7 @@ class Preferences {
     final pref = await SharedPreferences.getInstance();
     pref.setString('gen.background_color', generalPreferences.backgroundColor);
     pref.setBool('gen.showLastUpdate', generalPreferences.showLastUpdate);
+    pref.setBool('gen.closeNoteAfterSave', generalPreferences.closeNoteAfterSave);
   }
 
   static Future<HiddenPreferences> readHiddenPreferences() async {

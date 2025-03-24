@@ -10,15 +10,18 @@ void main(){
     test('Should save and read general preferences', () async {
       var color = "red";
       var lastUpdate = true;
+      var closeAfterSave = true;
       SharedPreferences.setMockInitialValues({
         "gen.background_color": "blue" ,
-        "gen.showLastUpdate": false
+        "gen.showLastUpdate": false,
+        "gen.closeAfterSave": true
       });
-      var generalPreferences = GeneralPreferences(backgroundColor: color, showLastUpdate: lastUpdate);
+      var generalPreferences = GeneralPreferences(backgroundColor: color, showLastUpdate: lastUpdate, closeNoteAfterSave:  closeAfterSave);
       await Preferences.saveGeneralPreferences(generalPreferences);
       await Preferences.readGeneralPreferences().then(( generalPreferences ){
         expect(generalPreferences.backgroundColor,color);
         expect(generalPreferences.showLastUpdate,lastUpdate);
+        expect(generalPreferences.closeNoteAfterSave,closeAfterSave);
       });
     });
 

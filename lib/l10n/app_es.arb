@@ -72,5 +72,6 @@
   "export": "Exportar",
   "import": "Importar",
   "settings": "Configuracion",
-  "showLastUpdate": "Mostrar ultima actualizacion en Notas"
+  "showLastUpdate": "Mostrar ultima actualizacion en Notas",
+  "closeNoteAfterSave": "Cerrar nota al guardar"
 }

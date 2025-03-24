@@ -31,6 +31,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
 
   Note? note;
 
+  bool closeNoteAfterSave = true;
+
   _EditNoteFormState({this.note}) {
     loadFields();
   }
@@ -46,7 +48,9 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
   initState() {
     super.initState();
     Preferences.readGeneralPreferences().then((generalPreferences) {
-      // to define
+      setState(() {
+        closeNoteAfterSave = generalPreferences.closeNoteAfterSave;
+      });
     });
   }
 
@@ -210,7 +214,8 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
         idCategory: idCategory));
     if (newId != 0) {
       message = l10n.loc!.noteSaved(title);
-      Navigator.pop(context);
+      if (closeNoteAfterSave)
+        Navigator.pop(context);
     } else {
       message = l10n.loc!.errorNoteNotSave;
     }

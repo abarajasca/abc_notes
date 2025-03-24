@@ -16,6 +16,7 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
   final backgrounColor = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool showLastUpdate = true;
+  bool closeNoteAfterSave = true;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +46,23 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                       Text(l10n.loc!.showLastUpdate),
-                      Checkbox(value: showLastUpdate,
-                          onChanged: (bool? value){
-                        setState((){
-                          showLastUpdate = value!;
-                        });
-                      }),],
+                        Switch(value: showLastUpdate,
+                            onChanged: (bool value ){
+                              setState((){
+                                showLastUpdate = value;
+                              }); }),
+                      ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.loc!.closeNoteAfterSave),
+                      Switch(value: closeNoteAfterSave,
+                          onChanged: (bool value ){
+                            setState((){
+                              closeNoteAfterSave = value;
+                            }); }),
+                    ],
                   ),
             ]),
           ),
@@ -66,6 +78,7 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
     Preferences.readGeneralPreferences().then((generalPreferences) {
       setState(() {
         showLastUpdate = generalPreferences.showLastUpdate;
+        closeNoteAfterSave = generalPreferences.closeNoteAfterSave;
       });
     });
   }
@@ -73,7 +86,8 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
   void _save(BuildContext context) async {
     GeneralPreferences generalPreferences = GeneralPreferences(
       backgroundColor: 'Blue',
-      showLastUpdate: showLastUpdate
+      showLastUpdate: showLastUpdate,
+      closeNoteAfterSave: closeNoteAfterSave
         );
     await Preferences.saveGeneralPreferences(generalPreferences);
 

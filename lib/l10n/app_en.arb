@@ -70,5 +70,6 @@
   "export": "Export",
   "import": "Import",
   "settings": "Settings",
-  "showLastUpdate": "Show Last update in Note lists"
+  "showLastUpdate": "Show Last update in Note lists",
+  "closeNoteAfterSave": "Close note after save"
 }
