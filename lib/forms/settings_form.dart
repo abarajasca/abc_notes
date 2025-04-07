@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:abc_notes/mixins/custom_forms.dart';
 import 'package:abc_notes/util/general_preferences.dart';
 import 'package:abc_notes/util/preferences.dart';
-import '../l10n/l10n.dart';
 
+import '../l10n/l10n.dart';
+import '../util/pubspec_reader.dart';
 
 class SettingsForm extends StatefulWidget {
   SettingsForm({Key? key}) : super(key: key);
@@ -17,6 +18,12 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
   final _formKey = GlobalKey<FormState>();
   bool showLastUpdate = true;
   bool closeNoteAfterSave = true;
+  String versionApp = "";
+
+  void readVersion() async {
+    var pubSpec = await PubspecReader().Read();
+    versionApp = '${pubSpec.version} Build ${pubSpec.build}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +71,8 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
                             }); }),
                     ],
                   ),
+                  Divider(),
+                  Text('Version: $versionApp')
             ]),
           ),
         ),
@@ -75,6 +84,7 @@ class _SettingsFormState extends State<SettingsForm> with CustomForms {
   @override
   initState() {
     super.initState();
+    readVersion();
     Preferences.readGeneralPreferences().then((generalPreferences) {
       setState(() {
         showLastUpdate = generalPreferences.showLastUpdate;
