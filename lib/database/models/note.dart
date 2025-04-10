@@ -1,4 +1,4 @@
-import 'package:abc_notes/database/models/model_base.dart';
+import 'package:sqlitemodel/model/model_base.dart';
 
 import 'category.dart';
 

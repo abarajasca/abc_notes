@@ -1,14 +1,17 @@
-import 'package:abc_notes/database/providers/test_sqlite_database.dart';
-import 'package:abc_notes/database/store/store.dart';
-import 'package:abc_notes/main.dart';
-import 'package:abc_notes/widgets/floating_button.dart';
+
+import 'package:abc_notes/database/config/test_database_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sqlitemodel/test_sqlite_database.dart';
+
+import 'package:abc_notes/database/store/store.dart';
+import 'package:abc_notes/main.dart';
+import 'package:abc_notes/widgets/floating_button.dart';
 
 Future setupApp(tester) async {
-  Store.databaseProvider = TestSqLiteDatabase();
+  Store.databaseProvider = TestSqLiteDatabase(TestDatabaseConfig());
 
   await tester.pumpWidget(const MaterialApp(
       localizationsDelegates: [

@@ -1,12 +1,13 @@
+import 'package:abc_notes/database/config/test_database_config.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlitemodel/test_sqlite_database.dart';
+
 import 'package:abc_notes/database/models/note.dart';
 import 'package:abc_notes/database/store/store.dart';
 
-import 'package:abc_notes/database/providers/test_sqlite_database.dart';
-
 Future main() async {
   test("Test SQLiteTest Provider ", () async {
-    Store.databaseProvider = TestSqLiteDatabase();
+    Store.databaseProvider = TestSqLiteDatabase(TestDatabaseConfig());
 
     await Store.notes.insert(Note(
         title: 'Note 1',

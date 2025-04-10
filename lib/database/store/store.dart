@@ -1,7 +1,7 @@
 import 'package:abc_notes/database/models/category.dart';
 import 'package:abc_notes/database/models/note.dart';
-import 'package:abc_notes/database/providers/database_provider.dart';
-import 'package:abc_notes/database/providers/model_provider.dart';
+import 'package:sqlitemodel/providers/database_provider.dart';
+import 'package:sqlitemodel/providers/model_provider.dart';
 
 class Store {
   static late ModelProvider<Category> categories;

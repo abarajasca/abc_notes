@@ -1,5 +1,6 @@
-import 'package:abc_notes/database/models/model_base.dart';
+
 import 'package:flutter/material.dart';
+import 'package:sqlitemodel/model/model_base.dart';
 
 class Category extends ModelBase {
   final int? id;
