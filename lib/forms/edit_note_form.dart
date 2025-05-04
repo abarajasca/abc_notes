@@ -205,17 +205,24 @@ class _EditNoteFormState extends State<EditNoteForm> with CustomForms {
       created_at = DateUtil.getCurrentDateTime();
       updated_at = created_at;
     }
-    newId = await Store.notes.insert(Note(
+    var noteToInsert = Note(
         id: _editMode() ? note!.id : null,
         title: title,
         body: body,
         created_at: created_at,
         updated_at: updated_at,
-        idCategory: idCategory));
+        idCategory: idCategory);
+
+    newId = await Store.notes.insert(noteToInsert);
     if (newId != 0) {
       message = l10n.loc!.noteSaved(title);
       if (closeNoteAfterSave)
         Navigator.pop(context);
+      noteToInsert.id = newId;
+      note = noteToInsert;
+      setState(() {
+
+      });
     } else {
       message = l10n.loc!.errorNoteNotSave;
     }
