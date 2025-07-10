@@ -71,5 +71,18 @@
   "import": "Import",
   "settings": "Settings",
   "showLastUpdate": "Show Last update in Note lists",
-  "closeNoteAfterSave": "Close note after save"
+  "closeNoteAfterSave": "Close note after save",
+  "select_backup": "Select backup",
+  "database": "Database",
+  "backup": "Backup",
+  "restore": "Restore",
+  "database_backed_up_to" : "Database backed up to",
+  "database_restored_from" : "Database restored from ",
+  "could_not_get_backup_directory_path" : "Could not get backup directory path",
+  "original_database_file_not_found": "Original database file not found",
+  "backup_file_not_found": "Backup file not found",
+  "error_restoring_database": "Error restoring database",
+  "error_deleting_backup": "Error deleting backup",
+  "backup_deleted" : "Backup deleted",
+  "cancel": "Cancel"
 }

@@ -13,7 +13,9 @@ enum AppActions {
     sort_category,
     sort_time,
     select_all,
-    unselect_all
+    unselect_all,
+    backup,
+    restore
 }
 
 abstract class FormActions {

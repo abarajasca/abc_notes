@@ -88,7 +88,6 @@ class SearchForm extends SearchDelegate {
 
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.green,

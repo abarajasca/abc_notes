@@ -15,6 +15,8 @@ enum NoteOptionsMenuItem {
   import,
   select_all,
   unselect_all,
+  backup,
+  restore,
   settings
 }
 

@@ -102,7 +102,9 @@ class MainFormState extends State<MainForm> {
     return MaterialApp(
       theme: ThemeData(
           appBarTheme:
-              AppBarTheme(iconTheme: IconThemeData(color: Colors.white))),
+              AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
+              fontFamily: 'Quicksand',
+      ),
       title: appTitle,
       home: Scaffold(
         appBar: AppBar(
@@ -223,11 +225,17 @@ class MainFormState extends State<MainForm> {
               PopupMenuItem<int>(value: NoteOptionsMenuItem.select_all.index, child: Text('Select all')),
               PopupMenuItem<int>(value: NoteOptionsMenuItem.unselect_all.index, child: Text('Unselect all')),
               PopupMenuDivider(),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.backup.index, child: Text('Backup')),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.restore.index, child: Text('Restore')),
+              PopupMenuDivider(),
               PopupMenuItem<int>(value: NoteOptionsMenuItem.settings.index, child: Text(l10n.loc!.settings)),
             ];
           } else {
             menuItemsAdditional = [
               PopupMenuItem<int>(value: NoteOptionsMenuItem.import.index, child: Text(l10n.loc!.import)),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.backup.index, child: Text('Backup')),
+              PopupMenuItem<int>(value: NoteOptionsMenuItem.restore.index, child: Text('Restore')),
               PopupMenuDivider(),
               PopupMenuItem<int>(value: NoteOptionsMenuItem.settings.index, child: Text(l10n.loc!.settings))
             ];
@@ -299,6 +307,12 @@ class MainFormState extends State<MainForm> {
             (_forms[0] as FormActions).onAction(AppActions.unselect_all);
             break;
           case 4:
+            (_forms[0] as FormActions).onAction(AppActions.backup);
+            break;
+          case 5:
+            (_forms[0] as FormActions).onAction(AppActions.restore);
+            break;
+          case 6:
             (_forms[0] as FormActions).onAction(AppActions.settings);
             break;
         }

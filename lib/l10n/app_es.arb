@@ -73,5 +73,18 @@
   "import": "Importar",
   "settings": "Configuracion",
   "showLastUpdate": "Mostrar ultima actualizacion en Notas",
-  "closeNoteAfterSave": "Cerrar nota al guardar"
+  "closeNoteAfterSave": "Cerrar nota al guardar",
+  "select_backup": "Selecione respaldo",
+  "database": "Base de datos",
+  "backup": "Respaldar",
+  "restore": "Restaurar",
+  "database_backed_up_to" : "Base de datos respaldada en",
+  "database_restored_from" : "Base de datos restaurada de",
+  "could_not_get_backup_directory_path" : "No se puede obtener la ruta de respaldos",
+  "original_database_file_not_found": "Archivo de base de datos no encontrado",
+  "backup_file_not_found": "Archivo de respaldo no se encontro",
+  "error_restoring_database": "Error al restaurar bases de datos",
+  "error_deleting_backup": "Error al borrar respaldo",
+  "backup_deleted" : "Respaldo borrado",
+  "cancel": "Cancelar"
 }

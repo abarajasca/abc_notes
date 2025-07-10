@@ -4,7 +4,12 @@ import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sqlitebackup/backup_restore_service.dart';
+import 'package:sqlitebackup/on_event.dart';
+import 'package:sqlitebackup/select_backup.dart';
 
+import '../database/backup/app_backup_messages.dart';
+import '../database/config/app_database_config.dart';
 import '../database/models/category.dart';
 import '../database/models/note.dart';
 import '../util/general_preferences.dart';
@@ -18,7 +23,6 @@ import '../util/date_util.dart';
 import '../widgets/floating_button.dart';
 import '../export/export_as_text.dart';
 import '../export/export_note.dart';
-
 
 import 'form_modes.dart';
 import 'main_form.dart';
@@ -55,11 +59,12 @@ class NotesForm extends StatefulWidget implements FormActions {
       AppActions.sort_time: _notesFormState.sort_time,
       AppActions.select_all: _notesFormState.select_all,
       AppActions.unselect_all: _notesFormState.unselect_all,
+      AppActions.backup: _notesFormState.backup,
+      AppActions.restore: _notesFormState.restore,
     };
 
     return formActions;
   }
-
 
   @override
   void onAction(AppActions action) {
@@ -77,12 +82,12 @@ class _NotesFormState extends State<NotesForm> with Settings {
   bool refreshData = true;
   late MainFormState _mainForm;
   bool showLastUpdate = false;
-  late Map<AppActions,int Function(Selectable<dynamic>, Selectable<dynamic>)>  _sortComparators;
-  late Map<AppActions,bool Function()> _sortTypes;
+  late Map<AppActions, int Function(Selectable<dynamic>, Selectable<dynamic>)>
+      _sortComparators;
+  late Map<AppActions, bool Function()> _sortTypes;
 
-
-  _NotesFormState(){
-    _sortComparators =  _mapSortComparators();
+  _NotesFormState() {
+    _sortComparators = _mapSortComparators();
     _sortTypes = _mapSortTypes();
   }
 
@@ -127,51 +132,49 @@ class _NotesFormState extends State<NotesForm> with Settings {
             }
             return const Center(child: CircularProgressIndicator());
           }),
-      floatingActionButton: FloatingButton(key: ValueKey('add_note'), onPressed: () {
-        addNote();
-      }),
+      floatingActionButton: FloatingButton(
+          key: ValueKey('add_note'),
+          onPressed: () {
+            addNote();
+          }),
     );
   }
 
-  Widget noteTitle(Note note){
-    return
-      Column(children: [
-        Row(
-          children: [
-            Expanded(
-                flex: 75,
-                child: Text('${note.title}')),
-            Expanded(
-              flex: 25,
-              child: Text(
-                note.category.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 10,
-                    background: Paint()
-                      ..color = Color(note.category.color)
-                      ..strokeWidth = 18
-                      ..strokeJoin = StrokeJoin.round
-                      ..strokeCap = StrokeCap.round
-                      ..style = PaintingStyle.stroke,
-                    color: Colors.white),
-              ),
+  Widget noteTitle(Note note) {
+    return Column(children: [
+      Row(
+        children: [
+          Expanded(flex: 75, child: Text('${note.title}')),
+          Expanded(
+            flex: 25,
+            child: Text(
+              note.category.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 10,
+                  background: Paint()
+                    ..color = Color(note.category.color)
+                    ..strokeWidth = 18
+                    ..strokeJoin = StrokeJoin.round
+                    ..strokeCap = StrokeCap.round
+                    ..style = PaintingStyle.stroke,
+                  color: Colors.white),
             ),
-          ],
-        ),
-        Row(children: [
-          if (showLastUpdate)
-            Text(
-                '${DateUtil.formatUIDateTime(note.updated_at)}',
-                style: TextStyle(fontSize: 10))
-        ])
-      ]);
+          ),
+        ],
+      ),
+      Row(children: [
+        if (showLastUpdate)
+          Text('${DateUtil.formatUIDateTime(note.updated_at)}',
+              style: TextStyle(fontSize: 10))
+      ])
+    ]);
   }
 
-  StatefulBuilder? noteTrailing(Selectable<dynamic> model){
+  StatefulBuilder? noteTrailing(Selectable<dynamic> model) {
     return _mainForm.select == true
-        ? StatefulBuilder(builder: (BuildContext context,
-            StateSetter setStateInternal) {
+        ? StatefulBuilder(
+            builder: (BuildContext context, StateSetter setStateInternal) {
             return Checkbox(
               key: ValueKey('chk-note'),
               value: model.isSelected,
@@ -191,10 +194,9 @@ class _NotesFormState extends State<NotesForm> with Settings {
       Navigator.pop(context, model);
     } else {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => EditNoteForm(
-                  note: model.model)))
+              context,
+              MaterialPageRoute(
+                  builder: (context) => EditNoteForm(note: model.model)))
           .then((value) {
         setState(() {
           refreshData = true;
@@ -281,13 +283,11 @@ class _NotesFormState extends State<NotesForm> with Settings {
 
   Future<void> _saveNotesAsFiles(String? selectedDirectory) async {
     ExportAsText exportAsText = new ExportAsText();
-    ExportNote exportNote = ExportNote(selectedDirectory!,exportAsText);
+    ExportNote exportNote = ExportNote(selectedDirectory!, exportAsText);
 
     if (await Permission.manageExternalStorage.request().isGranted) {
-      dataModel
-          .where((element) => element.isSelected)
-          .forEach((element) async {
-            exportNote.export(element.model);
+      dataModel.where((element) => element.isSelected).forEach((element) async {
+        exportNote.export(element.model);
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(l10n.loc!.notesExporterIn(selectedDirectory))));
@@ -366,19 +366,22 @@ class _NotesFormState extends State<NotesForm> with Settings {
     });
   }
 
-  Map<AppActions,bool Function()> _mapSortTypes() {
+  Map<AppActions, bool Function()> _mapSortTypes() {
     return {
-      AppActions.sort_time: () => _mainForm.sort_time ,
-      AppActions.sort_title: () => _mainForm.sort_title ,
-      AppActions.sort_category: () => _mainForm.sort_category ,
+      AppActions.sort_time: () => _mainForm.sort_time,
+      AppActions.sort_title: () => _mainForm.sort_title,
+      AppActions.sort_category: () => _mainForm.sort_category,
     };
   }
 
-  Map<AppActions, int Function(Selectable<dynamic>,Selectable<dynamic>) > _mapSortComparators(){
+  Map<AppActions, int Function(Selectable<dynamic>, Selectable<dynamic>)>
+      _mapSortComparators() {
     return {
-      AppActions.sort_time: (x,y) => x.model.updated_at.compareTo(y.model.updated_at),
-      AppActions.sort_title: (x,y) => x.model.title.compareTo(y.model.title) ,
-      AppActions.sort_category: (x,y) => x.model.category.name.compareTo(y.model.category.name),
+      AppActions.sort_time: (x, y) =>
+          x.model.updated_at.compareTo(y.model.updated_at),
+      AppActions.sort_title: (x, y) => x.model.title.compareTo(y.model.title),
+      AppActions.sort_category: (x, y) =>
+          x.model.category.name.compareTo(y.model.category.name),
     };
   }
 
@@ -393,7 +396,7 @@ class _NotesFormState extends State<NotesForm> with Settings {
         x = b;
         y = a;
       }
-      return _sortComparators[_mainForm.sort_type]!(x,y);
+      return _sortComparators[_mainForm.sort_type]!(x, y);
     });
   }
 
@@ -432,6 +435,44 @@ class _NotesFormState extends State<NotesForm> with Settings {
       dataModel.forEach((element) {
         element.isSelected = value;
       });
+    });
+  }
+
+  void backup() async {
+    String _databaseMessages;
+    try {
+      var backupService = await BackupRestoreService(
+          await Store.notes.databaseProvider.database,
+          AppDatabaseConfig().getDatabaseFilename(),
+          "backups");
+      _databaseMessages = await backupService.backupDatabase();
+    } on Exception catch (e) {
+      _databaseMessages = '$e';
+    }
+    onBackupDialogEvent(OnEvent.backup, _databaseMessages);
+  }
+
+  void restore() async {
+    try {
+      await SelectBackupDialog(
+          context: context,
+          database: await Store.notes.databaseProvider.database,
+          databaseFileName: AppDatabaseConfig().getDatabaseFilename(),
+          backupFolderName: 'backups',
+          backupMessages: AppBackupMessages(),
+          onEvent: onBackupDialogEvent);
+    } on Exception catch (e) {
+      onBackupDialogEvent(OnEvent.restore, '$e');
+    }
+  }
+
+  void onBackupDialogEvent(OnEvent event, String message) {
+    setState(() {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppBackupMessages().translate(message))));
+      if (event == OnEvent.restore) {
+        refreshData = true;
+      }
     });
   }
 }
