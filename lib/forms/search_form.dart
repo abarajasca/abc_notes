@@ -75,7 +75,7 @@ class SearchForm extends SearchDelegate {
       itemCount: suggestionList.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(suggestionList[index]['title']),
+          title: Text(suggestionList[index]['title'],style: TextStyle(fontFamily: 'Quicksand')),
           onTap: () {
             query = suggestionList[index]['title'];
             // Show the search results based on the selected suggestion.
@@ -94,15 +94,18 @@ class SearchForm extends SearchDelegate {
         iconTheme: IconThemeData(
             color: Colors.white
         ),
-        titleTextStyle: TextStyle(color:Colors.white),
+        titleTextStyle: TextStyle(color:Colors.white,fontFamily: 'Quicksand'),
         toolbarTextStyle: theme.textTheme.bodyMedium,
       ),
       textTheme: TextTheme(
         titleLarge: TextStyle(
           color: Colors.white,
-          fontSize: 18
+          fontSize: 18,
+          fontFamily: 'Quicksand'
         ),
+
       ),
+
       hintColor: Colors.white,
 
       inputDecorationTheme: searchFieldDecorationTheme ??
